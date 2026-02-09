@@ -1,0 +1,63 @@
+[
+  {
+    "name": "Toulouse",
+    "zip": "31000",
+    "population": 471941,
+    "coords": {
+      "lat": 43.6047,
+      "lng": 1.4442
+    },
+    "category": [
+      "france_metropole"
+    ]
+  },
+  {
+    "name": "Paris",
+    "zip": "75000",
+    "population": 2161000,
+    "coords": {
+      "lat": 48.8566,
+      "lng": 2.3522
+    },
+    "category": [
+      "france_metropole",
+      "capital"
+    ]
+  },
+  {
+    "name": "Lyon",
+    "zip": "69000",
+    "population": 513275,
+    "coords": {
+      "lat": 45.7640,
+      "lng": 4.8357
+    },
+    "category": [
+      "france_metropole"
+    ]
+  },
+  {
+    "name": "Marseille",
+    "zip": "13000",
+    "population": 861635,
+    "coords": {
+      "lat": 43.2965,
+      "lng": 5.3698
+    },
+    "category": [
+      "france_metropole"
+    ]
+  },
+  {
+    "name": "Bordeaux",
+    "zip": "33000",
+    "population": 249712,
+    "coords": {
+      "lat": 44.8378,
+      "lng": -0.5792
+    },
+    "category": [
+      "france_metropole"
+    ]
+  }
+]
