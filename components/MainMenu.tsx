@@ -1,7 +1,7 @@
-import { Map, Globe } from 'lucide-react';
+import { Map, Globe, Trophy } from 'lucide-react';
 
 interface MainMenuProps {
-    onSelectMode: (mode: 'france' | 'capital') => void;
+    onSelectMode: (mode: 'france' | 'capital' | 'story') => void;
 }
 
 export default function MainMenu({ onSelectMode }: MainMenuProps) {
@@ -16,30 +16,43 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
                 <button
                     onClick={() => onSelectMode('france')}
-                    className="group relative flex flex-col items-center justify-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/50 hover:scale-105 transition-all duration-300"
+                    className="group relative flex flex-col items-center justify-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/50 hover:scale-105 transition-all duration-300"
                 >
                     <div className="p-4 rounded-full bg-blue-500/10 text-blue-400 mb-4 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                        <Map className="w-12 h-12" />
+                        <Map className="w-10 h-10" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Villes de France</h2>
-                    <p className="text-slate-400 text-center">
+                    <h2 className="text-xl font-bold text-white mb-2">Villes de France</h2>
+                    <p className="text-slate-400 text-center text-sm">
                         Trouvez 50 grandes villes françaises.
                     </p>
                 </button>
 
                 <button
                     onClick={() => onSelectMode('capital')}
-                    className="group relative flex flex-col items-center justify-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/50 hover:scale-105 transition-all duration-300"
+                    className="group relative flex flex-col items-center justify-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/50 hover:scale-105 transition-all duration-300"
                 >
                     <div className="p-4 rounded-full bg-emerald-500/10 text-emerald-400 mb-4 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                        <Globe className="w-12 h-12" />
+                        <Globe className="w-10 h-10" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Capitales du Monde</h2>
-                    <p className="text-slate-400 text-center">
+                    <h2 className="text-xl font-bold text-white mb-2">Capitales</h2>
+                    <p className="text-slate-400 text-center text-sm">
                         Voyagez à travers 30 capitales mondiales.
+                    </p>
+                </button>
+
+                <button
+                    onClick={() => onSelectMode('story')}
+                    className="group relative flex flex-col items-center justify-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-amber-500/50 hover:scale-105 transition-all duration-300"
+                >
+                    <div className="p-4 rounded-full bg-amber-500/10 text-amber-400 mb-4 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                        <Trophy className="w-10 h-10" />
+                    </div>
+                    <h2 className="text-xl font-bold text-white mb-2">Mode Histoire</h2>
+                    <p className="text-slate-400 text-center text-sm">
+                        30 niveaux à débloquer avec difficulté croissante.
                     </p>
                 </button>
             </div>

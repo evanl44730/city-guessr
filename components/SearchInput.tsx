@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from 'react';
 import citiesData from '@/data/cities.json';
 import { Search } from 'lucide-react';

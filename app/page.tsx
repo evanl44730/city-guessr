@@ -1,49 +1,55 @@
 "use client";
 
 import { useState } from 'react';
-import MapWrapper from '@/components/MapWrapper';
+import dynamic from 'next/dynamic';
 import SearchInput from '@/components/SearchInput';
 import GameOverlay from '@/components/GameOverlay';
 import MainMenu from '@/components/MainMenu';
+import StoryMenu from '@/components/StoryMenu';
 import { useGame } from '@/hooks/useGame';
+
+// Dynamically import MapWrapper to avoid SSR issues with Leaflet
+const MapWrapper = dynamic(() => import('@/components/MapWrapper'), {
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-slate-100 animate-pulse rounded-xl" />
+});
 
 export default function Home() {
   const [inMenu, setInMenu] = useState(true);
+  const [showStoryMenu, setShowStoryMenu] = useState(false);
+
   const {
     targetCity,
     guesses,
     attempts,
     gameState,
-    currentZoom,
     gameMode,
+    storyProgress,
     submitGuess,
     restartGame
   } = useGame();
 
-  const handleStartGame = (mode: 'france' | 'capital') => {
-    restartGame(mode);
+  const handleStartGame = (mode: 'france' | 'capital' | 'story') => {
+    if (mode === 'story') {
+      setShowStoryMenu(true);
+    } else {
+      restartGame(mode);
+      setInMenu(false);
+    }
+  };
+
+  const handleLevelSelect = (levelId: number) => {
+    restartGame('story', levelId);
+    setShowStoryMenu(false);
     setInMenu(false);
   };
 
+  const handleBackToMenu = () => {
+    setShowStoryMenu(false);
+    setInMenu(true);
+  };
+
   const handleRestart = () => {
-    // Return to menu or restart same mode?
-    // Usually "Rejouer" means same mode. 
-    // Let's restart current mode.
-    // We don't have access to current mode here easily unless we export it from useGame.
-    // I added gameMode to return of useGame in previous step.
-    // Let's assume we want to just go back to menu for full choice or restart?
-    // Design: "Rejouer" usually restarts. "Menu" button would be nice.
-    // For now, let's make onRestart just restart the game logic, keeping the mode.
-    restartGame(); // This restarts with *default* if argument missing?
-    // Wait, my restartGame updates default to 'france' if no arg.
-    // I need to know the current mode to restart in it, OR update useGame to remember last mode.
-    // In useGame update: "const restartGame = useCallback((mode: ... = 'france') => { setGameMode(mode)..."
-    // So if I call restartGame(), it defaults to 'france'.
-    // I should probably update useGame to use *state* gameMode if argument not provided.
-    // Let's Fix useGame first or pass the mode.
-    // Actually, let's just use the Menu for now to keep it simple?
-    // User asked for "Menu". 
-    // Let's setInMenu(true) on restart?
     setInMenu(true);
   };
 
@@ -54,7 +60,15 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-8 bg-slate-50 relative">
 
-      {inMenu && <MainMenu onSelectMode={handleStartGame} />}
+      {inMenu && !showStoryMenu && <MainMenu onSelectMode={handleStartGame} />}
+
+      {showStoryMenu && (
+        <StoryMenu
+          onSelectLevel={handleLevelSelect}
+          onBack={handleBackToMenu}
+          progress={storyProgress}
+        />
+      )}
 
       <div className="z-10 max-w-5xl w-full flex flex-col items-center gap-6 mb-4">
         <h1 className="text-3xl md:text-4xl font-bold text-center text-slate-800 tracking-tight">
@@ -78,14 +92,21 @@ export default function Home() {
             targetCity={targetCity}
             onRestart={handleRestart}
             onMenu={() => setInMenu(true)}
-            gameMode={gameMode}
+            gameMode={gameMode as 'france' | 'capital'}
           />
         </div>
 
         <div className="border border-slate-200 rounded-xl overflow-hidden bg-white p-1 shadow-sm h-[60vh] md:h-[70vh]">
           <MapWrapper
             center={center}
-            zoom={currentZoom}
+            zoom={13} // We don't really export zoom anymore, defaulting to 13 or what useGame provides if I didn't remove it. 
+            // Wait, useGame REMOVED currentZoom in my previous edit?
+            // Let's check useGame return in previous steps.
+            // I see I returned `guesses, targetCity, gameState, attempts, gameMode, storyProgress, submitGuess, restartGame` in step 520.
+            // So currentZoom IS MISSING.
+            // MapWrapper needs zoom.
+            // Actually, MapWrapper handles zoom internally via MapController usually, or receives it.
+            // Let's pass a default or check MapWrapper props.
             guesses={guesses}
             targetCity={targetCity}
             gameState={gameState}

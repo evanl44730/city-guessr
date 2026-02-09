@@ -1,5 +1,5 @@
 import { GameState, Guess } from '@/hooks/useGame';
-import { RotateCcw, History, Home, Flag, Globe } from 'lucide-react';
+import { RotateCcw, History, Home, Flag, Globe, Trophy } from 'lucide-react';
 import { CityData } from '@/utils/gameUtils';
 
 interface GameOverlayProps {
@@ -9,7 +9,7 @@ interface GameOverlayProps {
     targetCity: CityData | null;
     onRestart: () => void;
     onMenu: () => void;
-    gameMode: 'france' | 'capital';
+    gameMode: 'france' | 'capital' | 'story';
 }
 
 export default function GameOverlay({ attempts, guesses, gameState, targetCity, onRestart, onMenu, gameMode }: GameOverlayProps) {
@@ -99,13 +99,23 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                         )}
 
                         <div className="space-y-3">
-                            <button
-                                onClick={onRestart}
-                                className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3 px-6 rounded-xl font-medium hover:bg-slate-800 transition-colors"
-                            >
-                                <RotateCcw className="h-4 w-4" />
-                                Rejouer
-                            </button>
+                            {gameMode === 'story' && gameState === 'won' ? (
+                                <button
+                                    onClick={onMenu}
+                                    className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-700 transition-colors"
+                                >
+                                    <Trophy className="h-4 w-4" />
+                                    Continuer (Menu)
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={onRestart}
+                                    className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3 px-6 rounded-xl font-medium hover:bg-slate-800 transition-colors"
+                                >
+                                    <RotateCcw className="h-4 w-4" />
+                                    Rejouer
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
