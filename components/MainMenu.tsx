@@ -22,60 +22,60 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
             </div>
 
             <div className="relative z-10 flex flex-col items-center w-full max-w-6xl px-4 animate-in fade-in zoom-in duration-500">
-                <div className="text-center mb-16">
-                    <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 tracking-tighter mb-4 drop-shadow-2xl">
+                <div className="text-center mb-8 md:mb-16">
+                    <h1 className="text-4xl md:text-6xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 tracking-tighter mb-2 md:mb-4 drop-shadow-2xl">
                         CityGuessr
                     </h1>
-                    <p className="text-slate-300 text-xl md:text-2xl font-light tracking-wide">
+                    <p className="text-slate-300 text-lg md:text-2xl font-light tracking-wide">
                         Explorez le monde, devinez les villes.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full">
                     <button
                         onClick={() => onSelectMode('france')}
-                        className="group relative flex flex-col items-center p-8 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-blue-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300"
+                        className="group relative flex flex-col items-center p-4 md:p-8 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-blue-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300"
                     >
                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="p-6 rounded-2xl bg-blue-500/20 text-blue-400 mb-6 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-blue-500/10">
-                            <Map className="w-12 h-12" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-blue-500/20 text-blue-400 mb-4 md:mb-6 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-blue-500/10">
+                            <Map className="w-8 h-8 md:w-12 md:h-12" />
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors">France</h2>
-                        <p className="text-slate-400 text-center text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-blue-300 transition-colors">France</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
                             Maîtrisez la géographie française. <br /> 50 grandes villes à localiser.
                         </p>
                     </button>
 
                     <button
                         onClick={() => onSelectMode('capital')}
-                        className="group relative flex flex-col items-center p-8 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-emerald-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300"
+                        className="group relative flex flex-col items-center p-4 md:p-8 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-emerald-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300"
                     >
                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="p-6 rounded-2xl bg-emerald-500/20 text-emerald-400 mb-6 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-emerald-500/10">
-                            <Globe className="w-12 h-12" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-emerald-500/20 text-emerald-400 mb-4 md:mb-6 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-emerald-500/10">
+                            <Globe className="w-8 h-8 md:w-12 md:h-12" />
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-emerald-300 transition-colors">Monde</h2>
-                        <p className="text-slate-400 text-center text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-emerald-300 transition-colors">Monde</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
                             Voyagez à travers les continents. <br /> 30 capitales à découvrir.
                         </p>
                     </button>
 
                     <button
                         onClick={() => onSelectMode('story')}
-                        className="group relative flex flex-col items-center p-8 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-amber-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300"
+                        className="group relative flex flex-col items-center p-4 md:p-8 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-amber-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300"
                     >
                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="p-6 rounded-2xl bg-amber-500/20 text-amber-400 mb-6 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-amber-500/10">
-                            <Trophy className="w-12 h-12" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-amber-500/20 text-amber-400 mb-4 md:mb-6 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-amber-500/10">
+                            <Trophy className="w-8 h-8 md:w-12 md:h-12" />
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-amber-300 transition-colors">Histoire</h2>
-                        <p className="text-slate-400 text-center text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-amber-300 transition-colors">Histoire</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
                             Relevez le défi ultime. <br /> 30 niveaux de difficulté croissante.
                         </p>
                     </button>
                 </div>
 
-                <div className="mt-16 flex items-center gap-2 text-slate-500 text-xs font-medium tracking-widest uppercase opacity-60">
+                <div className="mt-8 md:mt-16 flex items-center gap-2 text-slate-500 text-[10px] md:text-xs font-medium tracking-widest uppercase opacity-60">
                     <span>Alpha v1.0</span>
                     <span className="w-1 h-1 rounded-full bg-slate-500" />
                     <span>Next.js</span>

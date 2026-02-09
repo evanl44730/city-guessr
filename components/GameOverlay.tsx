@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { GameState, Guess } from '@/hooks/useGame';
 import { RotateCcw, History, Home, Flag, Globe, Trophy } from 'lucide-react';
 import { CityData } from '@/utils/gameUtils';
@@ -14,35 +15,36 @@ interface GameOverlayProps {
 
 export default function GameOverlay({ attempts, guesses, gameState, targetCity, onRestart, onMenu, gameMode }: GameOverlayProps) {
     const isGameOver = gameState !== 'playing';
+    const [showHistory, setShowHistory] = useState(false);
 
     return (
         <>
             {/* HUD Bar - Top Left */}
             <div className="absolute top-4 left-4 pointer-events-auto z-20">
-                <div className="flex items-center gap-4 bg-slate-900/80 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-white/10 ring-1 ring-black/5">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-4 bg-slate-900/80 backdrop-blur-md p-2 md:p-3 rounded-2xl shadow-lg border border-white/10 ring-1 ring-black/5">
+                    <div className="flex items-center gap-2 md:gap-3">
                         <button
                             onClick={onMenu}
-                            className="p-2.5 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"
+                            className="p-2 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"
                             title="Retour au menu"
                         >
                             <Home className="h-5 w-5" />
                         </button>
-                        <div className="w-px h-8 bg-white/10" />
+                        <div className="w-px h-6 md:h-8 bg-white/10" />
 
                         <div className="flex flex-col items-start gap-1">
                             <div className="flex items-center gap-2">
                                 {gameMode === 'france' ? <Flag className="h-3.5 w-3.5 text-blue-400" /> : gameMode === 'capital' ? <Globe className="h-3.5 w-3.5 text-emerald-400" /> : <Trophy className="h-3.5 w-3.5 text-amber-400" />}
-                                <span className="text-slate-200 font-bold text-xs uppercase tracking-wider">
+                                <span className="text-slate-200 font-bold text-[10px] md:text-xs uppercase tracking-wider hidden sm:inline">
                                     {gameMode === 'france' ? 'France' : gameMode === 'capital' ? 'Monde' : 'Histoire'}
                                 </span>
                             </div>
 
-                            <div className="flex gap-1.5">
+                            <div className="flex gap-1 md:gap-1.5">
                                 {[...Array(6)].map((_, i) => (
                                     <div
                                         key={i}
-                                        className={`h-1.5 w-6 rounded-full transition-all duration-500 ${i < attempts ? 'bg-gradient-to-r from-red-500 to-red-600 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-slate-700/50'}`}
+                                        className={`h-1.5 w-4 md:w-6 rounded-full transition-all duration-500 ${i < attempts ? 'bg-gradient-to-r from-red-500 to-red-600 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-slate-700/50'}`}
                                     />
                                 ))}
                             </div>
@@ -53,26 +55,47 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
 
             {/* History Box - Top Right */}
             {guesses.length > 0 && (
-                <div className="absolute top-4 right-4 w-72 bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/10 overflow-hidden pointer-events-auto max-h-[60vh] flex flex-col z-20 animate-in slide-in-from-right-4 fade-in duration-300">
-                    <div className="p-4 bg-white/5 border-b border-white/5 flex items-center gap-2">
-                        <History className="h-4 w-4 text-slate-400" />
-                        <h3 className="font-bold text-slate-200 text-sm tracking-wide">Historique <span className="text-slate-500 font-medium">({guesses.length})</span></h3>
-                    </div>
-                    <div className="overflow-y-auto p-2 space-y-2 custom-scrollbar">
-                        {[...guesses].reverse().map((guess, idx) => (
-                            <div key={idx} className="flex items-center justify-between text-sm p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-slate-500 group-hover:bg-blue-400 transition-colors" />
-                                    <span className="font-medium text-slate-200">{guess.city.name}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-slate-400 text-xs font-mono">
-                                    <span className="bg-black/20 px-1.5 py-0.5 rounded">{Math.round(guess.distance)} km</span>
-                                    <span>{guess.direction}</span>
-                                </div>
+                <>
+                    {/* Toggle Button for Mobile */}
+                    <button
+                        onClick={() => setShowHistory(!showHistory)}
+                        className={`fixed top-20 right-4 z-30 p-2.5 bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/10 shadow-lg text-slate-300 hover:text-white transition-all active:scale-95 ${showHistory ? 'bg-white/10 text-white ring-1 ring-white/20' : ''}`}
+                    >
+                        <History className="h-5 w-5" />
+                    </button>
+
+                    {/* History Panel */}
+                    <div className={`
+                        absolute top-4 right-4 w-72 bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden pointer-events-auto max-h-[60vh] flex flex-col z-20 
+                        transition-all duration-300 origin-top-right
+                        ${showHistory ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-4 pointer-events-none absolute'}
+                    `}>
+                        <div className="p-4 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <History className="h-4 w-4 text-slate-400" />
+                                <h3 className="font-bold text-slate-200 text-sm tracking-wide">Historique <span className="text-slate-500 font-medium">({guesses.length})</span></h3>
                             </div>
-                        ))}
+                            <button onClick={() => setShowHistory(false)} className="text-slate-500 hover:text-white transition-colors">
+                                <span className="sr-only">Fermer</span>
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <div className="overflow-y-auto p-2 space-y-2 custom-scrollbar">
+                            {[...guesses].reverse().map((guess, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-sm p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-2 h-2 rounded-full bg-slate-500 group-hover:bg-blue-400 transition-colors" />
+                                        <span className="font-medium text-slate-200">{guess.city.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-400 text-xs font-mono">
+                                        <span className="bg-black/20 px-1.5 py-0.5 rounded">{Math.round(guess.distance)} km</span>
+                                        <span>{guess.direction}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </>
             )}
 
             {/* Game Over Modal */}

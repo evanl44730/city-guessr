@@ -59,7 +59,7 @@ export default function Home() {
     : [46.603354, 1.888334];
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-8 bg-[url('/grid.svg')] bg-cover relative overflow-x-hidden">
+    <main className="flex min-h-screen flex-col items-center justify-between p-2 md:p-8 bg-[url('/grid.svg')] bg-cover relative overflow-x-hidden">
       {/* Background Gradient */}
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 pointer-events-none" />
 
@@ -74,12 +74,12 @@ export default function Home() {
       )}
 
       {!inMenu && (
-        <div className="z-50 max-w-5xl w-full flex flex-col items-center gap-6 mb-4 animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-none">
-          <h1 className="text-4xl md:text-5xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 tracking-tighter drop-shadow-2xl pointer-events-auto">
+        <div className="z-50 max-w-5xl w-full flex flex-col items-center gap-4 md:gap-6 mb-2 md:mb-4 animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-none">
+          <h1 className="text-2xl md:text-5xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 tracking-tighter drop-shadow-2xl pointer-events-auto">
             CityGuessr
           </h1>
 
-          <div className="w-full max-w-md z-50 pointer-events-auto">
+          <div className="w-full max-w-md z-50 pointer-events-auto px-4 md:px-0">
             <SearchInput
               onSelect={submitGuess}
               disabled={gameState !== 'playing'}
@@ -88,7 +88,7 @@ export default function Home() {
         </div>
       )}
 
-      <div className="w-full max-w-5xl flex flex-col gap-4 relative z-0 animate-in fade-in zoom-in duration-700 delay-100">
+      <div className="w-full max-w-5xl flex flex-col gap-4 relative z-0 animate-in fade-in zoom-in duration-700 delay-100 flex-1 min-h-0">
         <div className="absolute inset-0 z-10 pointer-events-none">
           <GameOverlay
             attempts={attempts}
@@ -101,7 +101,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="border border-white/10 rounded-2xl overflow-hidden bg-slate-800/50 shadow-2xl backdrop-blur-sm h-[60vh] md:h-[70vh] ring-1 ring-white/5">
+        <div className="border border-white/10 rounded-2xl overflow-hidden bg-slate-800/50 shadow-2xl backdrop-blur-sm h-full ring-1 ring-white/5">
           <MapWrapper
             center={center}
             zoom={currentZoom}
@@ -112,7 +112,7 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="mt-8 text-center text-slate-500 text-xs font-medium tracking-widest uppercase z-10 opacity-70 hover:opacity-100 transition-opacity">
+      <footer className="mt-4 md:mt-8 pb-2 text-center text-slate-500 text-[10px] md:text-xs font-medium tracking-widest uppercase z-10 opacity-70 hover:opacity-100 transition-opacity">
         Devinez la ville • Zoom progressif • v1.0
       </footer>
     </main>
