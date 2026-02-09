@@ -1,8 +1,8 @@
-import { Map, Globe, Trophy } from 'lucide-react';
+import { Map, Globe, Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
 
 interface MainMenuProps {
-    onSelectMode: (mode: 'france' | 'capital' | 'story') => void;
+    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online') => void;
 }
 
 export default function MainMenu({ onSelectMode }: MainMenuProps) {
@@ -31,7 +31,7 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
                     <button
                         onClick={() => onSelectMode('france')}
                         className="group relative flex flex-col items-center p-4 md:p-8 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-blue-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300"
@@ -73,6 +73,20 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                             Relevez le défi ultime. <br /> 30 niveaux de difficulté croissante.
                         </p>
                     </button>
+
+                    <button
+                        onClick={() => onSelectMode('online')}
+                        className="group relative flex flex-col items-center p-4 md:p-8 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-purple-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300"
+                    >
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-purple-500/20 text-purple-400 mb-4 md:mb-6 group-hover:bg-purple-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-purple-500/10">
+                            <Users className="w-8 h-8 md:w-12 md:h-12" />
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-purple-300 transition-colors">En ligne</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                            Affrontez vos amis. <br /> Devinez en temps réel.
+                        </p>
+                    </button>
                 </div>
 
                 <div className="mt-8 md:mt-16 flex items-center gap-2 text-slate-500 text-[10px] md:text-xs font-medium tracking-widest uppercase opacity-60">
@@ -80,7 +94,9 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                     <span className="w-1 h-1 rounded-full bg-slate-500" />
                     <span>Next.js</span>
                     <span className="w-1 h-1 rounded-full bg-slate-500" />
-                    <span>Leaflet</span>
+                    <div className="flex gap-2 text-slate-500 text-[10px] md:text-xs font-medium tracking-widest uppercase opacity-60">
+                        <span>Leaflet</span>
+                    </div>
                 </div>
             </div>
         </div>

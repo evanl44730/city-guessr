@@ -4,8 +4,9 @@ import { useState, useCallback, useEffect } from 'react';
 import citiesData from '@/data/cities.json';
 import { CityData, calculateDistance, calculateDirection, getRandomCity } from '@/utils/gameUtils';
 import { STORY_LEVELS } from '@/data/storyLevels';
+import { socket } from '@/lib/socket';
 
-export type GameState = 'playing' | 'won' | 'lost';
+export type GameState = 'playing' | 'won' | 'lost' | 'waiting' | 'ended';
 
 export interface Guess {
     city: CityData;
@@ -27,13 +28,22 @@ const ZOOM_LEVELS: Record<number, number> = {
 export function useGame() {
     const [targetCity, setTargetCity] = useState<CityData | null>(null);
     const [guesses, setGuesses] = useState<Guess[]>([]);
-    const [attempts, setAttempts] = useState(6);
+    const [attempts, setAttempts] = useState(6); // For local: attempts remaining. For online: attempts used in current round (?) 
+    // Actually used as "attempts made" in original code (0 at start).
     const [gameState, setGameState] = useState<GameState>('playing');
     const [currentZoom, setCurrentZoom] = useState(16);
 
-    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story'>('france');
+    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online'>('france');
     const [currentLevelId, setCurrentLevelId] = useState<number>(1);
     const [storyProgress, setStoryProgress] = useState<Record<number, number>>({}); // Level ID -> Best Score (attempts)
+
+    // Online State
+    const [roomId, setRoomId] = useState<string>('');
+    const [players, setPlayers] = useState<any[]>([]);
+    const [isHost, setIsHost] = useState(false);
+    const [currentRound, setCurrentRound] = useState(0);
+    const [totalRounds, setTotalRounds] = useState(10);
+    const [onlinePhase, setOnlinePhase] = useState<'menu' | 'lobby' | 'game'>('menu');
 
     // Load progress on mount
     useEffect(() => {
@@ -47,9 +57,74 @@ export function useGame() {
         }
     }, []);
 
-    // Initialize game on mount
+    // Socket Events
     useEffect(() => {
-        restartGame('france');
+        if (!socket) return;
+
+        function onRoomCreated({ roomId }: { roomId: string }) {
+            setRoomId(roomId);
+            setIsHost(true);
+            setOnlinePhase('lobby');
+        }
+
+        function onRoomJoined({ roomId }: { roomId: string }) {
+            setRoomId(roomId);
+            setIsHost(false);
+            setOnlinePhase('lobby');
+        }
+
+        function onUpdatePlayers(updatedPlayers: any[]) {
+            setPlayers(updatedPlayers);
+        }
+
+        function onGameStarted({ totalRounds, firstCity }: { totalRounds: number, firstCity: CityData }) {
+            setTotalRounds(totalRounds);
+            setCurrentRound(1);
+            setOnlinePhase('game');
+            setGameState('playing');
+            setTargetCity(firstCity);
+            setGuesses([]);
+            setAttempts(0);
+            setCurrentZoom(ZOOM_LEVELS[6]);
+        }
+
+        function onNextRound({ round, city, players }: { round: number, city: CityData, players: any[] }) {
+            setCurrentRound(round);
+            setPlayers(players);
+            setGameState('playing');
+            setTargetCity(city);
+            setGuesses([]);
+            setAttempts(0);
+            setCurrentZoom(ZOOM_LEVELS[6]);
+        }
+
+        function onGameOver({ players }: { players: any[] }) {
+            setPlayers(players);
+            setGameState('ended');
+            // Show final leaderboard overlay
+        }
+
+        function onError(msg: string) {
+            alert(msg);
+        }
+
+        socket.on('room_created', onRoomCreated);
+        socket.on('room_joined', onRoomJoined);
+        socket.on('update_players', onUpdatePlayers);
+        socket.on('game_started', onGameStarted);
+        socket.on('next_round', onNextRound);
+        socket.on('game_over', onGameOver);
+        socket.on('error', onError);
+
+        return () => {
+            socket.off('room_created', onRoomCreated);
+            socket.off('room_joined', onRoomJoined);
+            socket.off('update_players', onUpdatePlayers);
+            socket.off('game_started', onGameStarted);
+            socket.off('next_round', onNextRound);
+            socket.off('game_over', onGameOver);
+            socket.off('error', onError);
+        };
     }, []);
 
     const saveProgress = (levelId: number, attemptsCount: number) => {
@@ -64,8 +139,14 @@ export function useGame() {
         });
     };
 
-    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' = 'france', levelId?: number) => {
+    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' = 'france', levelId?: number) => {
         setGameMode(mode);
+
+        if (mode === 'online') {
+            socket.connect();
+            setOnlinePhase('menu');
+            return;
+        }
 
         // Reset state
         setGuesses([]);
@@ -118,24 +199,48 @@ export function useGame() {
             const newAttempts = attempts + 1;
             setAttempts(newAttempts);
 
-            if (distance < 20) { // Win condition < 20km
-                setGameState('won');
+            // Win or Loss logic
+            let isWin = distance < 20;
+            let isLoss = newAttempts >= 6;
+
+            if (isWin) {
+                setGameState(gameMode === 'online' ? 'waiting' : 'won');
                 if (gameMode === 'story') {
-                    saveProgress(currentLevelId, newAttempts); // Save number of attempts
+                    saveProgress(currentLevelId, newAttempts);
+                }
+                if (gameMode === 'online') {
+                    socket.emit('submit_round', { roomId, attempts: newAttempts });
+                }
+            } else if (isLoss) {
+                setGameState(gameMode === 'online' ? 'waiting' : 'lost');
+                setCurrentZoom(4);
+                if (gameMode === 'online') {
+                    socket.emit('submit_round', { roomId, attempts: 6 }); // Max penalty
                 }
             } else {
                 // Update zoom based on remaining attempts
-                // Max 6 attempts allowed.
                 const remaining = 6 - newAttempts;
                 setCurrentZoom(ZOOM_LEVELS[remaining] || 4);
-
-                if (newAttempts >= 6) {
-                    setGameState('lost');
-                    setCurrentZoom(4);
-                }
             }
         }
-    }, [gameState, targetCity, guesses, attempts, gameMode, currentLevelId]);
+    }, [gameState, targetCity, guesses, attempts, gameMode, currentLevelId, roomId]);
+
+    // Online Actions
+    const createRoom = (username: string) => {
+        socket.connect();
+        socket.emit('create_room', { username });
+    };
+
+    const joinRoom = (username: string, roomId: string) => {
+        socket.connect();
+        socket.emit('join_room', { roomId, username });
+    };
+
+    const startGame = () => {
+        if (isHost && roomId) {
+            socket.emit('start_game', { roomId });
+        }
+    };
 
     return {
         targetCity,
@@ -146,6 +251,16 @@ export function useGame() {
         gameMode,
         storyProgress,
         submitGuess,
-        restartGame
+        restartGame,
+        // Online Exports
+        onlinePhase,
+        roomId,
+        players,
+        isHost,
+        currentRound,
+        totalRounds,
+        createRoom,
+        joinRoom,
+        startGame
     };
 }
