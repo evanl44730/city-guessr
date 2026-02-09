@@ -34,7 +34,7 @@ interface MapComponentProps {
   gameState: GameState;
 }
 
-function MapController({ center, zoom }: { center: [number, number]; zoom: number }) {
+function MapController({ center, zoom, gameState }: { center: [number, number]; zoom: number; gameState: GameState }) {
   const map = useMap();
 
   useEffect(() => {
@@ -43,19 +43,24 @@ function MapController({ center, zoom }: { center: [number, number]; zoom: numbe
       duration: 2
     });
 
-    // 2. Set constraints
-    map.setMinZoom(zoom);
+    // 2. Set constraints ONLY if playing
+    if (gameState === 'playing') {
+      map.setMinZoom(zoom);
 
-    // Calculate bounds for the current zoom level to restrict panning
-    // Heuristic: Allow panning within a reasonable box around the center
-    const delta = 360 / Math.pow(2, zoom) * 1.5;
-    const southWest = L.latLng(center[0] - delta, center[1] - delta);
-    const northEast = L.latLng(center[0] + delta, center[1] + delta);
-    const bounds = L.latLngBounds(southWest, northEast);
+      // Calculate bounds for the current zoom level to restrict panning
+      const delta = 360 / Math.pow(2, zoom) * 1.5;
+      const southWest = L.latLng(center[0] - delta, center[1] - delta);
+      const northEast = L.latLng(center[0] + delta, center[1] + delta);
+      const bounds = L.latLngBounds(southWest, northEast);
 
-    map.setMaxBounds(bounds);
+      map.setMaxBounds(bounds);
+    } else {
+      // Unlock map on Game Over
+      map.setMinZoom(2);
+      map.setMaxBounds(null as any);
+    }
 
-  }, [center, zoom, map]);
+  }, [center, zoom, map, gameState]);
 
   return null;
 }
@@ -90,7 +95,7 @@ export default function MapComponent({ center, zoom, guesses, targetCity, gameSt
         maxBoundsViscosity={1.0}
         className="h-full w-full rounded-lg shadow-md"
       >
-        <MapController center={center} zoom={zoom} />
+        <MapController center={center} zoom={zoom} gameState={gameState} />
 
         {/* Esri World Imagery (Satellite) */}
         <TileLayer

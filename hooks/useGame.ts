@@ -35,13 +35,24 @@ export function useGame() {
     const [gameState, setGameState] = useState<GameState>('playing');
     const [currentZoom, setCurrentZoom] = useState(16);
 
+    const [gameMode, setGameMode] = useState<'france' | 'capital'>('france');
+
     // Initialize game on mount
     useEffect(() => {
-        restartGame();
+        restartGame('france');
     }, []);
 
-    const restartGame = useCallback(() => {
-        const newTarget = getRandomCity(citiesData as CityData[]);
+    const restartGame = useCallback((mode: 'france' | 'capital' = 'france') => {
+        setGameMode(mode);
+
+        let pool = (citiesData as CityData[]);
+        if (mode === 'france') {
+            pool = pool.filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
+        } else {
+            pool = pool.filter(c => c.category.includes('world_capital'));
+        }
+
+        const newTarget = getRandomCity(pool);
         setTargetCity(newTarget);
         setGuesses([]);
         setAttempts(6);
@@ -52,6 +63,11 @@ export function useGame() {
     const submitGuess = useCallback((cityName: string) => {
         if (gameState !== 'playing' || !targetCity) return;
 
+        // Find city in the ENTIRE dataset (user might type a french city in capital mode, technically wrong but searchable)
+        // Or restrict search? Let's search in whole data but maybe warn if not in mode?
+        // Actually, existing SearchInput filters by what is in data. 
+        // We should probably filter SearchInput too? 
+        // For now, let's allow finding any city in the JSON.
         const city = (citiesData as CityData[]).find(c => c.name.toLowerCase() === cityName.toLowerCase());
 
         if (!city) {
@@ -71,11 +87,15 @@ export function useGame() {
 
         if (city.name === targetCity.name) {
             setGameState('won');
-            // Keep zoom or maybe zoom out to show context? 
-            // For now, let's keep it close to celebrate or maybe zoom out slightly.
         } else {
             const newAttempts = attempts - 1;
             setAttempts(newAttempts);
+            // If capital mode, maybe zoom levels should be different? 
+            // World is big. 
+            // Level 4 (Reveal) is whole world. 
+            // Level 16 (Start) is street level.
+            // For capitals, maybe start a bit zoomed out? 
+            // Let's keep it consistent for now.
             setCurrentZoom(ZOOM_LEVELS[newAttempts] || 4);
 
             if (newAttempts <= 0) {
@@ -91,6 +111,7 @@ export function useGame() {
         attempts,
         gameState,
         currentZoom,
+        gameMode,
         submitGuess,
         restartGame
     };

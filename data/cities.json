@@ -599,5 +599,389 @@
         "category": [
             "france_metropole"
         ]
+    },
+    {
+        "name": "London",
+        "zip": "",
+        "population": 8982000,
+        "coords": {
+            "lat": 51.5074,
+            "lng": -0.1278
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Berlin",
+        "zip": "",
+        "population": 3645000,
+        "coords": {
+            "lat": 52.5200,
+            "lng": 13.4050
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Madrid",
+        "zip": "",
+        "population": 3223000,
+        "coords": {
+            "lat": 40.4168,
+            "lng": -3.7038
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Rome",
+        "zip": "",
+        "population": 2873000,
+        "coords": {
+            "lat": 41.9028,
+            "lng": 12.4964
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Washington, D.C.",
+        "zip": "",
+        "population": 689545,
+        "coords": {
+            "lat": 38.9072,
+            "lng": -77.0369
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Beijing",
+        "zip": "",
+        "population": 21540000,
+        "coords": {
+            "lat": 39.9042,
+            "lng": 116.4074
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Tokyo",
+        "zip": "",
+        "population": 13960000,
+        "coords": {
+            "lat": 35.6762,
+            "lng": 139.6503
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Moscow",
+        "zip": "",
+        "population": 11920000,
+        "coords": {
+            "lat": 55.7558,
+            "lng": 37.6173
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Canberra",
+        "zip": "",
+        "population": 395790,
+        "coords": {
+            "lat": -35.2809,
+            "lng": 149.1300
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Brasilia",
+        "zip": "",
+        "population": 3055000,
+        "coords": {
+            "lat": -15.8267,
+            "lng": -47.9218
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Ottawa",
+        "zip": "",
+        "population": 934243,
+        "coords": {
+            "lat": 45.4215,
+            "lng": -75.6972
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "New Delhi",
+        "zip": "",
+        "population": 21750000,
+        "coords": {
+            "lat": 28.6139,
+            "lng": 77.2090
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Cairo",
+        "zip": "",
+        "population": 9840000,
+        "coords": {
+            "lat": 30.0444,
+            "lng": 31.2357
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Buenos Aires",
+        "zip": "",
+        "population": 2890000,
+        "coords": {
+            "lat": -34.6037,
+            "lng": -58.3816
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Pretoria",
+        "zip": "",
+        "population": 741651,
+        "coords": {
+            "lat": -25.7479,
+            "lng": 28.2293
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Bangkok",
+        "zip": "",
+        "population": 8280000,
+        "coords": {
+            "lat": 13.7563,
+            "lng": 100.5018
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Seoul",
+        "zip": "",
+        "population": 9776000,
+        "coords": {
+            "lat": 37.5665,
+            "lng": 126.9780
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Jakarta",
+        "zip": "",
+        "population": 10560000,
+        "coords": {
+            "lat": -6.2088,
+            "lng": 106.8456
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Riyadh",
+        "zip": "",
+        "population": 7676000,
+        "coords": {
+            "lat": 24.7136,
+            "lng": 46.6753
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Ankara",
+        "zip": "",
+        "population": 5663000,
+        "coords": {
+            "lat": 39.9334,
+            "lng": 32.8597
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Wellington",
+        "zip": "",
+        "population": 215400,
+        "coords": {
+            "lat": -41.2865,
+            "lng": 174.7762
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Bern",
+        "zip": "",
+        "population": 133883,
+        "coords": {
+            "lat": 46.9480,
+            "lng": 7.4474
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Brussels",
+        "zip": "",
+        "population": 1218000,
+        "coords": {
+            "lat": 50.8503,
+            "lng": 4.3517
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Lisbon",
+        "zip": "",
+        "population": 504718,
+        "coords": {
+            "lat": 38.7223,
+            "lng": -9.1393
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Stockholm",
+        "zip": "",
+        "population": 975551,
+        "coords": {
+            "lat": 59.3293,
+            "lng": 18.0686
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Oslo",
+        "zip": "",
+        "population": 634293,
+        "coords": {
+            "lat": 59.9139,
+            "lng": 10.7522
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Copenhagen",
+        "zip": "",
+        "population": 602481,
+        "coords": {
+            "lat": 55.6761,
+            "lng": 12.5683
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Helsinki",
+        "zip": "",
+        "population": 631695,
+        "coords": {
+            "lat": 60.1699,
+            "lng": 24.9384
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Amsterdam",
+        "zip": "",
+        "population": 821752,
+        "coords": {
+            "lat": 52.3676,
+            "lng": 4.9041
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Warsaw",
+        "zip": "",
+        "population": 1790658,
+        "coords": {
+            "lat": 52.2297,
+            "lng": 21.0122
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Vienna",
+        "zip": "",
+        "population": 1911000,
+        "coords": {
+            "lat": 48.2082,
+            "lng": 16.3738
+        },
+        "category": [
+            "world_capital"
+        ]
+    },
+    {
+        "name": "Athens",
+        "zip": "",
+        "population": 664046,
+        "coords": {
+            "lat": 37.9838,
+            "lng": 23.7275
+        },
+        "category": [
+            "world_capital"
+        ]
     }
 ]
