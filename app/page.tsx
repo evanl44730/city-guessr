@@ -23,6 +23,7 @@ export default function Home() {
     guesses,
     attempts,
     gameState,
+    currentZoom,
     gameMode,
     storyProgress,
     submitGuess,
@@ -58,7 +59,9 @@ export default function Home() {
     : [46.603354, 1.888334];
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-8 bg-slate-50 relative">
+    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-8 bg-[url('/grid.svg')] bg-cover relative overflow-x-hidden">
+      {/* Background Gradient */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 pointer-events-none" />
 
       {inMenu && !showStoryMenu && <MainMenu onSelectMode={handleStartGame} />}
 
@@ -70,20 +73,22 @@ export default function Home() {
         />
       )}
 
-      <div className="z-10 max-w-5xl w-full flex flex-col items-center gap-6 mb-4">
-        <h1 className="text-3xl md:text-4xl font-bold text-center text-slate-800 tracking-tight">
-          City<span className="text-blue-600">Guessr</span>
-        </h1>
+      {!inMenu && (
+        <div className="z-50 max-w-5xl w-full flex flex-col items-center gap-6 mb-4 animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-none">
+          <h1 className="text-4xl md:text-5xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 tracking-tighter drop-shadow-2xl pointer-events-auto">
+            CityGuessr
+          </h1>
 
-        <div className="w-full max-w-md z-20">
-          <SearchInput
-            onSelect={submitGuess}
-            disabled={gameState !== 'playing' || inMenu}
-          />
+          <div className="w-full max-w-md z-50 pointer-events-auto">
+            <SearchInput
+              onSelect={submitGuess}
+              disabled={gameState !== 'playing'}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="w-full max-w-5xl flex flex-col gap-4 relative">
+      <div className="w-full max-w-5xl flex flex-col gap-4 relative z-0 animate-in fade-in zoom-in duration-700 delay-100">
         <div className="absolute inset-0 z-10 pointer-events-none">
           <GameOverlay
             attempts={attempts}
@@ -92,21 +97,14 @@ export default function Home() {
             targetCity={targetCity}
             onRestart={handleRestart}
             onMenu={() => setInMenu(true)}
-            gameMode={gameMode as 'france' | 'capital'}
+            gameMode={gameMode as 'france' | 'capital' | 'story'}
           />
         </div>
 
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white p-1 shadow-sm h-[60vh] md:h-[70vh]">
+        <div className="border border-white/10 rounded-2xl overflow-hidden bg-slate-800/50 shadow-2xl backdrop-blur-sm h-[60vh] md:h-[70vh] ring-1 ring-white/5">
           <MapWrapper
             center={center}
-            zoom={13} // We don't really export zoom anymore, defaulting to 13 or what useGame provides if I didn't remove it. 
-            // Wait, useGame REMOVED currentZoom in my previous edit?
-            // Let's check useGame return in previous steps.
-            // I see I returned `guesses, targetCity, gameState, attempts, gameMode, storyProgress, submitGuess, restartGame` in step 520.
-            // So currentZoom IS MISSING.
-            // MapWrapper needs zoom.
-            // Actually, MapWrapper handles zoom internally via MapController usually, or receives it.
-            // Let's pass a default or check MapWrapper props.
+            zoom={currentZoom}
             guesses={guesses}
             targetCity={targetCity}
             gameState={gameState}
@@ -114,8 +112,8 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="mt-8 text-center text-slate-400 text-sm">
-        Devinez la ville cachée • Zoom progressif à chaque erreur
+      <footer className="mt-8 text-center text-slate-500 text-xs font-medium tracking-widest uppercase z-10 opacity-70 hover:opacity-100 transition-opacity">
+        Devinez la ville • Zoom progressif • v1.0
       </footer>
     </main>
   );

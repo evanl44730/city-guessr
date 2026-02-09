@@ -35,8 +35,9 @@ export default function SearchInput({ onSelect, disabled }: SearchInputProps) {
     };
 
     return (
-        <div className="relative w-full max-w-md mx-auto">
-            <form onSubmit={handleSubmit} className="relative">
+        <div className="relative w-full max-w-md mx-auto z-30">
+            <div className="absolute inset-0 bg-slate-900/50 blur-xl rounded-full transform scale-90 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <form onSubmit={handleSubmit} className="relative group">
                 <input
                     type="text"
                     value={query}
@@ -46,38 +47,40 @@ export default function SearchInput({ onSelect, disabled }: SearchInputProps) {
                     }}
                     onFocus={() => setShowSuggestions(true)}
                     disabled={disabled}
-                    placeholder="Entrez une ville..."
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed text-black placeholder:text-slate-400"
+                    placeholder="Quelle est cette ville ?"
+                    className="w-full pl-12 pr-24 py-4 rounded-xl border border-white/10 bg-slate-900/80 backdrop-blur-md shadow-2xl text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium tracking-wide"
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5 group-focus-within:text-blue-400 transition-colors" />
                 <button
                     type="submit"
                     disabled={disabled || !query}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-600/20 disabled:opacity-0 disabled:scale-95 transition-all transform active:scale-95"
                 >
                     Valider
                 </button>
             </form>
 
-            {showSuggestions && query && filteredCities.length > 0 && (
-                <ul className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden max-h-60 overflow-y-auto">
-                    {filteredCities.map((city) => (
-                        <li
-                            key={city.name}
-                            onClick={() => handleSelect(city.name)}
-                            className="px-4 py-2 hover:bg-slate-50 cursor-pointer text-slate-700 flex justify-between items-center"
-                        >
-                            <span>{city.name}</span>
-                            <span className="text-xs text-slate-400">{city.zip}</span>
-                        </li>
-                    ))}
-                </ul>
+            {showSuggestions && filteredCities.length > 0 && (
+                <div className="absolute z-[100] w-full mt-2 bg-slate-900 border border-white/20 rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200">
+                    <ul className="max-h-64 overflow-y-auto custom-scrollbar p-1">
+                        {filteredCities.map((city, index) => (
+                            <li
+                                key={`${city.name}-${city.zip}-${index}`}
+                                onClick={() => handleSelect(city.name)}
+                                className="px-4 py-3 hover:bg-white/10 cursor-pointer text-slate-100 flex justify-between items-center rounded-lg transition-colors group border-b border-white/5 last:border-0"
+                            >
+                                <span className="font-medium group-hover:text-white transition-colors">{city.name}</span>
+                                <span className="text-xs font-mono text-slate-400 group-hover:text-slate-300 bg-white/5 px-1.5 py-0.5 rounded">{city.zip}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             )}
 
             {/* Overlay to close suggestions when clicking outside */}
             {showSuggestions && (
                 <div
-                    className="fixed inset-0 z-40 bg-transparent"
+                    className="fixed inset-0 z-20 bg-transparent"
                     onClick={() => setShowSuggestions(false)}
                     aria-hidden="true"
                 />
