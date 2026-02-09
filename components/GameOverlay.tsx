@@ -19,31 +19,30 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
         <>
             {/* HUD Bar - Top Left */}
             <div className="absolute top-4 left-4 pointer-events-auto z-20">
-                <div className="flex items-center gap-4 bg-white/90 backdrop-blur-sm p-3 rounded-xl shadow-sm border border-slate-200">
+                <div className="flex items-center gap-4 bg-slate-900/80 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-white/10 ring-1 ring-black/5">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={onMenu}
-                            className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors"
+                            className="p-2.5 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-all active:scale-95"
                             title="Retour au menu"
                         >
                             <Home className="h-5 w-5" />
                         </button>
-                        <div className="w-px h-8 bg-slate-200" />
+                        <div className="w-px h-8 bg-white/10" />
 
-                        <div className="flex flex-col items-start gap-0.5">
+                        <div className="flex flex-col items-start gap-1">
                             <div className="flex items-center gap-2">
-                                {gameMode === 'france' ? <Flag className="h-3 w-3 text-blue-500" /> : <Globe className="h-3 w-3 text-emerald-500" />}
-                                <span className="text-slate-700 font-bold text-xs uppercase tracking-wider">
-                                    {gameMode === 'france' ? 'France' : 'Monde'}
+                                {gameMode === 'france' ? <Flag className="h-3.5 w-3.5 text-blue-400" /> : gameMode === 'capital' ? <Globe className="h-3.5 w-3.5 text-emerald-400" /> : <Trophy className="h-3.5 w-3.5 text-amber-400" />}
+                                <span className="text-slate-200 font-bold text-xs uppercase tracking-wider">
+                                    {gameMode === 'france' ? 'France' : gameMode === 'capital' ? 'Monde' : 'Histoire'}
                                 </span>
-                                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider ml-1">Essais</span>
                             </div>
 
-                            <div className="flex gap-1">
+                            <div className="flex gap-1.5">
                                 {[...Array(6)].map((_, i) => (
                                     <div
                                         key={i}
-                                        className={`h-1.5 w-5 rounded-full transition-colors ${i < attempts ? 'bg-green-500' : 'bg-slate-200'}`}
+                                        className={`h-1.5 w-6 rounded-full transition-all duration-500 ${i < attempts ? 'bg-gradient-to-r from-red-500 to-red-600 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-slate-700/50'}`}
                                     />
                                 ))}
                             </div>
@@ -54,20 +53,21 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
 
             {/* History Box - Top Right */}
             {guesses.length > 0 && (
-                <div className="absolute top-4 right-4 w-64 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 overflow-hidden pointer-events-auto max-h-[50vh] flex flex-col z-20">
-                    <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
-                        <History className="h-4 w-4 text-slate-500" />
-                        <h3 className="font-semibold text-slate-700 text-sm">Historique ({guesses.length})</h3>
+                <div className="absolute top-4 right-4 w-72 bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/10 overflow-hidden pointer-events-auto max-h-[60vh] flex flex-col z-20 animate-in slide-in-from-right-4 fade-in duration-300">
+                    <div className="p-4 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                        <History className="h-4 w-4 text-slate-400" />
+                        <h3 className="font-bold text-slate-200 text-sm tracking-wide">Historique <span className="text-slate-500 font-medium">({guesses.length})</span></h3>
                     </div>
-                    <div className="overflow-y-auto p-2 space-y-2">
+                    <div className="overflow-y-auto p-2 space-y-2 custom-scrollbar">
                         {[...guesses].reverse().map((guess, idx) => (
-                            <div key={idx} className="flex items-center justify-between text-sm p-2 bg-white rounded-lg border border-slate-100 shadow-sm">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-medium text-slate-800">{guess.city.name}</span>
+                            <div key={idx} className="flex items-center justify-between text-sm p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-slate-500 group-hover:bg-blue-400 transition-colors" />
+                                    <span className="font-medium text-slate-200">{guess.city.name}</span>
                                 </div>
-                                <div className="flex items-center gap-1 text-slate-600 text-xs">
-                                    <span>{Math.round(guess.distance)} km</span>
-                                    <span className="font-mono text-slate-400">{guess.direction}</span>
+                                <div className="flex items-center gap-2 text-slate-400 text-xs font-mono">
+                                    <span className="bg-black/20 px-1.5 py-0.5 rounded">{Math.round(guess.distance)} km</span>
+                                    <span>{guess.direction}</span>
                                 </div>
                             </div>
                         ))}
@@ -77,23 +77,31 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
 
             {/* Game Over Modal */}
             {isGameOver && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-300 pointer-events-auto">
-                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center relative overflow-hidden">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in zoom-in duration-300 pointer-events-auto">
+                    <div className="bg-slate-900 border border-white/10 rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center relative overflow-hidden">
+                        {/* Status Bar */}
+                        <div className={`absolute top-0 left-0 w-full h-2 ${gameState === 'won' ? 'bg-gradient-to-r from-green-400 to-emerald-500 shadow-[0_0_20px_rgba(52,211,153,0.5)]' : 'bg-gradient-to-r from-red-500 to-orange-500 shadow-[0_0_20px_rgba(248,113,113,0.5)]'}`} />
 
                         {gameState === 'won' ? (
                             <>
-                                <div className="absolute top-0 left-0 w-full h-2 bg-green-500" />
-                                <h2 className="text-3xl font-bold text-slate-800 mb-2">Bravo ! 🎉</h2>
-                                <p className="text-slate-600 mb-6">
-                                    Vous avez trouvé <span className="font-bold text-green-600">{targetCity?.name}</span> !
+                                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Trophy className="h-10 w-10 text-green-400" />
+                                </div>
+                                <h2 className="text-4xl font-black text-white mb-2 tracking-tight">Bravo ! 🎉</h2>
+                                <p className="text-slate-400 mb-8 leading-relaxed">
+                                    Vous avez trouvé <br />
+                                    <span className="font-bold text-green-400 text-xl block mt-1">{targetCity?.name}</span>
                                 </p>
                             </>
                         ) : (
                             <>
-                                <div className="absolute top-0 left-0 w-full h-2 bg-red-500" />
-                                <h2 className="text-3xl font-bold text-slate-800 mb-2">Perdu... 😢</h2>
-                                <p className="text-slate-600 mb-6">
-                                    La ville était <span className="font-bold text-blue-600">{targetCity?.name}</span>.
+                                <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <RotateCcw className="h-10 w-10 text-red-400" />
+                                </div>
+                                <h2 className="text-4xl font-black text-white mb-2 tracking-tight">Perdu... 😢</h2>
+                                <p className="text-slate-400 mb-8 leading-relaxed">
+                                    La ville était <br />
+                                    <span className="font-bold text-blue-400 text-xl block mt-1">{targetCity?.name}</span>
                                 </p>
                             </>
                         )}
@@ -102,17 +110,17 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                             {gameMode === 'story' && gameState === 'won' ? (
                                 <button
                                     onClick={onMenu}
-                                    className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-700 transition-colors"
+                                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-green-500/20"
                                 >
-                                    <Trophy className="h-4 w-4" />
+                                    <Trophy className="h-5 w-5" />
                                     Continuer (Menu)
                                 </button>
                             ) : (
                                 <button
                                     onClick={onRestart}
-                                    className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3 px-6 rounded-xl font-medium hover:bg-slate-800 transition-colors"
+                                    className="w-full flex items-center justify-center gap-2 bg-slate-800 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-slate-700 hover:scale-[1.02] active:scale-[0.98] transition-all border border-white/5"
                                 >
-                                    <RotateCcw className="h-4 w-4" />
+                                    <RotateCcw className="h-5 w-5" />
                                     Rejouer
                                 </button>
                             )}
