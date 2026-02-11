@@ -9,7 +9,7 @@ interface StoryMenuProps {
 }
 
 export default function StoryMenu({ onSelectLevel, onBack, progress }: StoryMenuProps) {
-    const [selectedCategory, setSelectedCategory] = useState<'france' | 'capital' | 'haute_garonne'>('france');
+    const [selectedCategory, setSelectedCategory] = useState<'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron'>('france');
 
     const filteredLevels = STORY_LEVELS.filter(level => level.category === selectedCategory);
 
@@ -38,36 +38,66 @@ export default function StoryMenu({ onSelectLevel, onBack, progress }: StoryMenu
                     </div>
 
                     {/* Category Tabs */}
-                    <div className="flex p-1 bg-slate-900/50 rounded-xl self-start overflow-x-auto max-w-full">
+                    <div className="flex p-1 bg-slate-900/50 rounded-xl self-start overflow-x-auto max-w-full custom-scrollbar gap-1">
                         <button
                             onClick={() => setSelectedCategory('france')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${selectedCategory === 'france'
+                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'france'
                                     ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
                                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            <MapIcon className="w-4 h-4" />
+                            <MapIcon className="w-3 h-3 md:w-4 md:h-4" />
                             France
                         </button>
                         <button
                             onClick={() => setSelectedCategory('capital')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${selectedCategory === 'capital'
+                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'capital'
                                     ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
                                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            <Globe className="w-4 h-4" />
+                            <Globe className="w-3 h-3 md:w-4 md:h-4" />
                             Monde
                         </button>
                         <button
                             onClick={() => setSelectedCategory('haute_garonne')}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${selectedCategory === 'haute_garonne'
+                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'haute_garonne'
                                     ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/25'
                                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            <LayoutGrid className="w-4 h-4" />
+                            <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
                             Haute-Garonne
+                        </button>
+                        <button
+                            onClick={() => setSelectedCategory('tarn')}
+                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'tarn'
+                                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/25'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
+                            Tarn
+                        </button>
+                        <button
+                            onClick={() => setSelectedCategory('loire_atlantique')}
+                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'loire_atlantique'
+                                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
+                            Loire-Atl.
+                        </button>
+                        <button
+                            onClick={() => setSelectedCategory('aveyron')}
+                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'aveyron'
+                                    ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
+                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
+                            Aveyron
                         </button>
                     </div>
                 </div>
@@ -75,10 +105,9 @@ export default function StoryMenu({ onSelectLevel, onBack, progress }: StoryMenu
                 {/* Levels Grid */}
                 <div className="overflow-y-auto grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-4 p-1 md:p-2 custom-scrollbar flex-1 min-h-0">
                     {filteredLevels.map((level) => {
-                        // Unlock logic: 
-                        // Level 1, 101, 201 are always unlocked.
-                        // Others require the previous level (id - 1) to be in progress.
-                        const isFirstLevel = level.id === 1 || level.id === 101 || level.id === 201;
+                        // Unlock logic:
+                        // First level of each category is always unlocked.
+                        const isFirstLevel = level.id === 1 || level.id === 101 || level.id === 201 || level.id === 301 || level.id === 401 || level.id === 501;
                         const isUnlocked = isFirstLevel || progress[level.id - 1] !== undefined;
 
                         const isCompleted = progress[level.id] !== undefined;

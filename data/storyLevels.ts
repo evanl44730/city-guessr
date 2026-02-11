@@ -5,7 +5,7 @@ export interface StoryLevel {
     cityName: string;
     difficulty: 'Easy' | 'Medium' | 'Hard' | 'Very Hard' | 'Expert';
     minScoreToUnlock: number;
-    category: 'france' | 'capital' | 'haute_garonne';
+    category: 'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron';
 }
 
 export const STORY_LEVELS: StoryLevel[] = [
@@ -135,4 +135,109 @@ export const STORY_LEVELS: StoryLevel[] = [
     { id: 228, cityName: "La Salvetat-Saint-Gilles", difficulty: "Hard", minScoreToUnlock: 6, category: "haute_garonne" },
     { id: 229, cityName: "Aussonne", difficulty: "Hard", minScoreToUnlock: 6, category: "haute_garonne" },
     { id: 230, cityName: "Escalquens", difficulty: "Hard", minScoreToUnlock: 6, category: "haute_garonne" },
+
+    // --- TARN (Levels 301-330) ---
+    // Easy
+    { id: 301, cityName: "Albi", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 302, cityName: "Castres", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 303, cityName: "Gaillac", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 304, cityName: "Mazamet", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 305, cityName: "Carmaux", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 306, cityName: "Graulhet", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 307, cityName: "Lavaur", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 308, cityName: "Saint-Sulpice-la-Pointe", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 309, cityName: "Saint-Juéry", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    { id: 310, cityName: "Aussillon", difficulty: "Easy", minScoreToUnlock: 6, category: "tarn" },
+    // Medium
+    { id: 311, cityName: "Labruguière", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 312, cityName: "Rabastens", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 313, cityName: "Lisle-sur-Tarn", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 314, cityName: "Lescure-d'Albigeois", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 315, cityName: "Saïx", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 316, cityName: "Réalmont", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 317, cityName: "Blaye-les-Mines", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 318, cityName: "Puylaurens", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 319, cityName: "Marssac-sur-Tarn", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    { id: 320, cityName: "Cordes-sur-Ciel", difficulty: "Medium", minScoreToUnlock: 6, category: "tarn" },
+    // Hard
+    { id: 321, cityName: "Sorèze", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 322, cityName: "Valence-d'Albigeois", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 323, cityName: "Lacaune", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 324, cityName: "Brassac", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 325, cityName: "Montredon-Labessonnié", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 326, cityName: "Burlats", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 327, cityName: "Aiguefonde", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 328, cityName: "Arthès", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 329, cityName: "Le Sequestre", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+    { id: 330, cityName: "Saint-Benoît-de-Carmaux", difficulty: "Hard", minScoreToUnlock: 6, category: "tarn" },
+
+    // --- LOIRE-ATLANTIQUE (Levels 401-430) ---
+    // Easy
+    { id: 401, cityName: "Nantes", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 402, cityName: "Saint-Nazaire", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 403, cityName: "Saint-Herblain", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 404, cityName: "Rezé", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 405, cityName: "Saint-Sébastien-sur-Loire", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 406, cityName: "Orvault", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 407, cityName: "Vertou", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 408, cityName: "Couëron", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 409, cityName: "Carquefou", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 410, cityName: "La Chapelle-sur-Erdre", difficulty: "Easy", minScoreToUnlock: 6, category: "loire_atlantique" },
+    // Medium
+    { id: 411, cityName: "Bouguenais", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 412, cityName: "La Baule-Escoublac", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 413, cityName: "Guérande", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 414, cityName: "Pornic", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 415, cityName: "Châteaubriant", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 416, cityName: "Saint-Brevin-les-Pins", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 417, cityName: "Sainte-Luce-sur-Loire", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 418, cityName: "Pornichet", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 419, cityName: "Pontchâteau", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 420, cityName: "Blain", difficulty: "Medium", minScoreToUnlock: 6, category: "loire_atlantique" },
+    // Hard
+    { id: 421, cityName: "Basse-Goulaine", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 422, cityName: "Vallet", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 423, cityName: "Treillières", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 424, cityName: "Thouaré-sur-Loire", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 425, cityName: "Ancenis-Saint-Géréon", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 426, cityName: "Savenay", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 427, cityName: "Trignac", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 428, cityName: "Sautron", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 429, cityName: "Donges", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+    { id: 430, cityName: "Saint-Julien-de-Concelles", difficulty: "Hard", minScoreToUnlock: 6, category: "loire_atlantique" },
+
+    // --- AVEYRON (Levels 501-530) ---
+    // Easy
+    { id: 501, cityName: "Rodez", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 502, cityName: "Millau", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 503, cityName: "Villefranche-de-Rouergue", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 504, cityName: "Onet-le-Château", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 505, cityName: "Saint-Affrique", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 506, cityName: "Decazeville", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 507, cityName: "Luc-la-Primaube", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 508, cityName: "Capdenac-Gare", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 509, cityName: "Espalion", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 510, cityName: "Aubin", difficulty: "Easy", minScoreToUnlock: 6, category: "aveyron" },
+    // Medium
+    { id: 511, cityName: "Sévérac-d'Aveyron", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 512, cityName: "Olemps", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 513, cityName: "Baraqueville", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 514, cityName: "Bozouls", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 515, cityName: "Laissac-Sévérac l'Église", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 516, cityName: "Marcillac-Vallon", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 517, cityName: "Rieupeyroux", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 518, cityName: "Saint-Geniez-d'Olt-et-d'Aubrac", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 519, cityName: "Naucelle", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 520, cityName: "Réquista", difficulty: "Medium", minScoreToUnlock: 6, category: "aveyron" },
+    // Hard
+    { id: 521, cityName: "Montbazens", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 522, cityName: "Laguiole", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 523, cityName: "Salles-Curan", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 524, cityName: "Sainte-Radegonde", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 525, cityName: "Villeneuve", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 526, cityName: "Pont-de-Salars", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 527, cityName: "Entraygues-sur-Truyère", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 528, cityName: "Livinhac-le-Haut", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 529, cityName: "Cransac", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
+    { id: 530, cityName: "Flavin", difficulty: "Hard", minScoreToUnlock: 6, category: "aveyron" },
 ];
