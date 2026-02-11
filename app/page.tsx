@@ -9,6 +9,7 @@ import StoryMenu from '@/components/StoryMenu';
 import MultiplayerMenu from '@/components/MultiplayerMenu';
 import Lobby from '@/components/Lobby';
 import MultiplayerGameOverlay from '@/components/MultiplayerGameOverlay';
+import DepartmentMenu from '@/components/DepartmentMenu';
 import { useGame } from '@/hooks/useGame';
 
 // Dynamically import MapWrapper to avoid SSR issues with Leaflet
@@ -21,10 +22,12 @@ export default function Home() {
   const [inMenu, setInMenu] = useState(true);
   const [showStoryMenu, setShowStoryMenu] = useState(false);
   const [showMultiplayerMenu, setShowMultiplayerMenu] = useState(false);
+  const [showDepartmentMenu, setShowDepartmentMenu] = useState(false);
 
   const [storyCategory, setStoryCategory] = useState<'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron'>('france');
 
   const {
+    // ... useGame hook (no change here)
     targetCity,
     guesses,
     attempts,
@@ -51,12 +54,14 @@ export default function Home() {
     startGame
   } = useGame();
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'haute_garonne') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
       setShowMultiplayerMenu(true);
       restartGame('online');
+    } else if (mode === 'department') {
+      setShowDepartmentMenu(true);
     } else {
       restartGame(mode);
       setInMenu(false);
@@ -69,9 +74,16 @@ export default function Home() {
     setInMenu(false);
   };
 
+  const handleDepartmentSelect = (departmentId: string) => {
+    restartGame('department', undefined, departmentId);
+    setShowDepartmentMenu(false);
+    setInMenu(false);
+  };
+
   const handleBackToMenu = () => {
     setShowStoryMenu(false);
     setShowMultiplayerMenu(false);
+    setShowDepartmentMenu(false);
     setInMenu(true);
     restartGame('france'); // Reset to default mode to clear online state if needed
   };
@@ -124,6 +136,13 @@ export default function Home() {
           progress={storyProgress}
           selectedCategory={storyCategory}
           onSelectCategory={setStoryCategory}
+        />
+      )}
+
+      {showDepartmentMenu && (
+        <DepartmentMenu
+          onSelectDepartment={handleDepartmentSelect}
+          onBack={handleBackToMenu}
         />
       )}
 

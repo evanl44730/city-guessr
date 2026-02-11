@@ -33,7 +33,8 @@ export function useGame() {
     const [gameState, setGameState] = useState<GameState>('playing');
     const [currentZoom, setCurrentZoom] = useState(16);
 
-    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'haute_garonne'>('france');
+    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department'>('france');
+    const [selectedDepartment, setSelectedDepartment] = useState<string>('31'); // Default to Haute-Garonne
     const [currentLevelId, setCurrentLevelId] = useState<number>(1);
     const [storyProgress, setStoryProgress] = useState<Record<number, number>>({}); // Level ID -> Best Score (attempts)
 
@@ -182,8 +183,9 @@ export function useGame() {
         });
     };
 
-    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'haute_garonne' = 'france', levelId?: number) => {
+    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' = 'france', levelId?: number, departmentId?: string) => {
         setGameMode(mode);
+        if (departmentId) setSelectedDepartment(departmentId);
 
         if (mode === 'online') {
             socket.connect();
@@ -197,7 +199,7 @@ export function useGame() {
         setGameState('playing');
 
         // Initial Zoom Logic
-        if (mode === 'haute_garonne') {
+        if (mode === 'department') {
             setCurrentZoom(13); // Fixed zoom for town level
         } else {
             setCurrentZoom(ZOOM_LEVELS[6]); // 6 attempts remaining
@@ -228,13 +230,14 @@ export function useGame() {
             pool = pool.filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
         } else if (mode === 'capital') {
             pool = pool.filter(c => c.category.includes('world_capital'));
-        } else if (mode === 'haute_garonne') {
-            pool = pool.filter(c => c.zip && c.zip.startsWith('31'));
+        } else if (mode === 'department') {
+            const dep = departmentId || selectedDepartment;
+            pool = pool.filter(c => c.zip && c.zip.startsWith(dep));
         }
 
         const newTarget = getRandomCity(pool);
         setTargetCity(newTarget);
-    }, []);
+    }, [selectedDepartment]);
 
     const nextCityTimeAttack = useCallback(() => {
         setGuesses([]);
@@ -285,6 +288,16 @@ export function useGame() {
                     setGameState(gameMode === 'online' ? 'waiting' : 'won');
                     if (gameMode === 'story') {
                         saveProgress(currentLevelId, newAttempts);
+                        // Unlock next level
+                        const storyLevel = STORY_LEVELS.find(l => l.cityName === targetCity.name);
+                        const storyLevelId = storyLevel?.id;
+                        if (storyLevelId) {
+                            setStoryProgress(prev => {
+                                const newProgress = { ...prev, [storyLevelId]: newAttempts };
+                                localStorage.setItem('city_guessr_story_progress', JSON.stringify(newProgress));
+                                return newProgress;
+                            });
+                        }
                     }
                     if (gameMode === 'online') {
                         socket.emit('submit_round', { roomId, attempts: newAttempts });
@@ -304,7 +317,7 @@ export function useGame() {
                     nextCityTimeAttack();
                 } else {
                     setGameState(gameMode === 'online' ? 'waiting' : 'lost');
-                    if (gameMode !== 'haute_garonne') {
+                    if (gameMode !== 'department') { // Changed from 'haute_garonne'
                         setCurrentZoom(4);
                     }
                     if (gameMode === 'online') {
@@ -313,7 +326,7 @@ export function useGame() {
                 }
             } else {
                 // Update zoom based on remaining attempts
-                if (gameMode !== 'haute_garonne') {
+                if (gameMode !== 'department') { // Changed from 'haute_garonne'
                     const remaining = 6 - newAttempts;
                     setCurrentZoom(ZOOM_LEVELS[remaining] || 4);
                 }
