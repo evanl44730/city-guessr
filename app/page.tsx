@@ -156,7 +156,12 @@ export default function Home() {
                 gameState={gameState}
                 targetCity={targetCity}
                 onRestart={handleRestart}
-                onMenu={() => setInMenu(true)}
+                onMenu={() => {
+                  setInMenu(true);
+                  if (gameMode === 'story') {
+                    setShowStoryMenu(true);
+                  }
+                }}
                 gameMode={gameMode as 'france' | 'capital' | 'story'}
               />
             )}
