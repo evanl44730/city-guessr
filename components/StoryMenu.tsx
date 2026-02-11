@@ -6,10 +6,13 @@ interface StoryMenuProps {
     onSelectLevel: (levelId: number) => void;
     onBack: () => void;
     progress: Record<number, number>;
+    selectedCategory: 'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron';
+    onSelectCategory: (category: 'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron') => void;
 }
 
-export default function StoryMenu({ onSelectLevel, onBack, progress }: StoryMenuProps) {
-    const [selectedCategory, setSelectedCategory] = useState<'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron'>('france');
+export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCategory, onSelectCategory }: StoryMenuProps) {
+    // Local state removed in favor of props
+    // const [selectedCategory, setSelectedCategory] = useState...
 
     const filteredLevels = STORY_LEVELS.filter(level => level.category === selectedCategory);
 
@@ -40,60 +43,60 @@ export default function StoryMenu({ onSelectLevel, onBack, progress }: StoryMenu
                     {/* Category Tabs */}
                     <div className="flex p-1 bg-slate-900/50 rounded-xl self-start overflow-x-auto max-w-full custom-scrollbar gap-1">
                         <button
-                            onClick={() => setSelectedCategory('france')}
+                            onClick={() => onSelectCategory('france')}
                             className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'france'
-                                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <MapIcon className="w-3 h-3 md:w-4 md:h-4" />
                             France
                         </button>
                         <button
-                            onClick={() => setSelectedCategory('capital')}
+                            onClick={() => onSelectCategory('capital')}
                             className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'capital'
-                                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <Globe className="w-3 h-3 md:w-4 md:h-4" />
                             Monde
                         </button>
                         <button
-                            onClick={() => setSelectedCategory('haute_garonne')}
+                            onClick={() => onSelectCategory('haute_garonne')}
                             className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'haute_garonne'
-                                    ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/25'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/25'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
                             Haute-Garonne
                         </button>
                         <button
-                            onClick={() => setSelectedCategory('tarn')}
+                            onClick={() => onSelectCategory('tarn')}
                             className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'tarn'
-                                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/25'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/25'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
                             Tarn
                         </button>
                         <button
-                            onClick={() => setSelectedCategory('loire_atlantique')}
+                            onClick={() => onSelectCategory('loire_atlantique')}
                             className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'loire_atlantique'
-                                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
                             Loire-Atl.
                         </button>
                         <button
-                            onClick={() => setSelectedCategory('aveyron')}
+                            onClick={() => onSelectCategory('aveyron')}
                             className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'aveyron'
-                                    ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
-                                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />

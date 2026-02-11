@@ -22,6 +22,8 @@ export default function Home() {
   const [showStoryMenu, setShowStoryMenu] = useState(false);
   const [showMultiplayerMenu, setShowMultiplayerMenu] = useState(false);
 
+  const [storyCategory, setStoryCategory] = useState<'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron'>('france');
+
   const {
     targetCity,
     guesses,
@@ -120,6 +122,8 @@ export default function Home() {
           onSelectLevel={handleLevelSelect}
           onBack={handleBackToMenu}
           progress={storyProgress}
+          selectedCategory={storyCategory}
+          onSelectCategory={setStoryCategory}
         />
       )}
 
