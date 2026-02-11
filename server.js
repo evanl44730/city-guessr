@@ -176,13 +176,27 @@ app.prepare().then(() => {
         });
 
         // Time Attack Leaderboard Events
+        // Time Attack Leaderboard Events
         socket.on('submit_score', ({ username, score }) => {
-            // Add new score
-            timeAttackLeaderboard.push({
-                username: username.slice(0, 15), // Limit length
-                score,
-                date: Date.now()
-            });
+            const cleanUsername = username.slice(0, 15); // Limit length
+
+            // Check if user already exists
+            const existingEntryIndex = timeAttackLeaderboard.findIndex(entry => entry.username === cleanUsername);
+
+            if (existingEntryIndex !== -1) {
+                // User exists, update score only if higher
+                if (score > timeAttackLeaderboard[existingEntryIndex].score) {
+                    timeAttackLeaderboard[existingEntryIndex].score = score;
+                    timeAttackLeaderboard[existingEntryIndex].date = Date.now();
+                }
+            } else {
+                // New user
+                timeAttackLeaderboard.push({
+                    username: cleanUsername,
+                    score,
+                    date: Date.now()
+                });
+            }
 
             // Sort by score (desc) and keep top 100
             timeAttackLeaderboard.sort((a, b) => b.score - a.score);

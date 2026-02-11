@@ -10,7 +10,7 @@ interface GameOverlayProps {
     targetCity: CityData | null;
     onRestart: () => void;
     onMenu: () => void;
-    gameMode: 'france' | 'capital' | 'story' | 'time_attack';
+    gameMode: 'france' | 'capital' | 'story' | 'time_attack' | 'haute_garonne';
     score?: number;
     timeLeft?: number;
     leaderboard?: Array<{ username: string, score: number }>;
@@ -60,9 +60,9 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                             )}
 
                             <div className="flex items-center gap-2">
-                                {gameMode === 'france' ? <Flag className="h-3.5 w-3.5 text-blue-400" /> : gameMode === 'capital' ? <Globe className="h-3.5 w-3.5 text-emerald-400" /> : <Trophy className="h-3.5 w-3.5 text-amber-400" />}
+                                {gameMode === 'france' ? <Flag className="h-3.5 w-3.5 text-blue-400" /> : gameMode === 'capital' ? <Globe className="h-3.5 w-3.5 text-emerald-400" /> : gameMode === 'haute_garonne' ? <Flag className="h-3.5 w-3.5 text-purple-400" /> : <Trophy className="h-3.5 w-3.5 text-amber-400" />}
                                 <span className="text-slate-200 font-bold text-[10px] md:text-xs uppercase tracking-wider hidden sm:inline">
-                                    {gameMode === 'france' ? 'France' : gameMode === 'capital' ? 'Monde' : gameMode === 'time_attack' ? 'Chrono' : 'Histoire'}
+                                    {gameMode === 'france' ? 'France' : gameMode === 'capital' ? 'Monde' : gameMode === 'time_attack' ? 'Chrono' : gameMode === 'haute_garonne' ? 'Haute-Garonne' : 'Histoire'}
                                 </span>
                             </div>
 

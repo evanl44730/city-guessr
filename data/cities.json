@@ -29,7 +29,7 @@
         "zip": "69000",
         "population": 513275,
         "coords": {
-            "lat": 45.7640,
+            "lat": 45.764,
             "lng": 4.8357
         },
         "category": [
@@ -45,7 +45,8 @@
             "lng": 1.4442
         },
         "category": [
-            "france_metropole"
+            "france_metropole",
+            "haute_garonne"
         ]
     },
     {
@@ -54,7 +55,7 @@
         "population": 342522,
         "coords": {
             "lat": 43.7102,
-            "lng": 7.2620
+            "lng": 7.262
         },
         "category": [
             "france_metropole"
@@ -197,7 +198,7 @@
         "zip": "21000",
         "population": 156920,
         "coords": {
-            "lat": 47.3220,
+            "lat": 47.322,
             "lng": 5.0415
         },
         "category": [
@@ -233,7 +234,7 @@
         "zip": "69100",
         "population": 147712,
         "coords": {
-            "lat": 45.7720,
+            "lat": 45.772,
             "lng": 4.8902
         },
         "category": [
@@ -282,7 +283,7 @@
         "population": 141398,
         "coords": {
             "lat": 45.7772,
-            "lng": 3.0870
+            "lng": 3.087
         },
         "category": [
             "france_metropole"
@@ -401,7 +402,7 @@
         "zip": "45000",
         "population": 114644,
         "coords": {
-            "lat": 47.9030,
+            "lat": 47.903,
             "lng": 1.9093
         },
         "category": [
@@ -437,7 +438,7 @@
         "zip": "95100",
         "population": 110210,
         "coords": {
-            "lat": 48.9480,
+            "lat": 48.948,
             "lng": 2.2488
         },
         "category": [
@@ -545,7 +546,7 @@
         "zip": "94000",
         "population": 92265,
         "coords": {
-            "lat": 48.7770,
+            "lat": 48.777,
             "lng": 2.4531
         },
         "category": [
@@ -617,8 +618,8 @@
         "zip": "",
         "population": 3645000,
         "coords": {
-            "lat": 52.5200,
-            "lng": 13.4050
+            "lat": 52.52,
+            "lng": 13.405
         },
         "category": [
             "world_capital"
@@ -702,7 +703,7 @@
         "population": 395790,
         "coords": {
             "lat": -35.2809,
-            "lng": 149.1300
+            "lng": 149.13
         },
         "category": [
             "world_capital"
@@ -738,7 +739,7 @@
         "population": 21750000,
         "coords": {
             "lat": 28.6139,
-            "lng": 77.2090
+            "lng": 77.209
         },
         "category": [
             "world_capital"
@@ -798,7 +799,7 @@
         "population": 9776000,
         "coords": {
             "lat": 37.5665,
-            "lng": 126.9780
+            "lng": 126.978
         },
         "category": [
             "world_capital"
@@ -857,7 +858,7 @@
         "zip": "",
         "population": 133883,
         "coords": {
-            "lat": 46.9480,
+            "lat": 46.948,
             "lng": 7.4474
         },
         "category": [
@@ -989,8 +990,8 @@
         "zip": "17000",
         "population": 79851,
         "coords": {
-            "lat": 46.1600,
-            "lng": -1.1500
+            "lat": 46.16,
+            "lng": -1.15
         },
         "category": [
             "france_metropole"
@@ -1001,8 +1002,8 @@
         "zip": "64000",
         "population": 80441,
         "coords": {
-            "lat": 43.3000,
-            "lng": -0.3700
+            "lat": 43.3,
+            "lng": -0.37
         },
         "category": [
             "france_metropole"
@@ -1038,7 +1039,7 @@
         "population": 81545,
         "coords": {
             "lat": 43.3476,
-            "lng": 3.2190
+            "lng": 3.219
         },
         "category": [
             "france_metropole"
@@ -1174,6 +1175,383 @@
         },
         "category": [
             "france_metropole"
+        ]
+    },
+    {
+        "name": "Colomiers",
+        "zip": "31770",
+        "population": 38951,
+        "coords": {
+            "lat": 43.6133,
+            "lng": 1.3366
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Tournefeuille",
+        "zip": "31170",
+        "population": 26962,
+        "coords": {
+            "lat": 43.5853,
+            "lng": 1.3444
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Blagnac",
+        "zip": "31700",
+        "population": 25152,
+        "coords": {
+            "lat": 43.6339,
+            "lng": 1.3969
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Muret",
+        "zip": "31600",
+        "population": 24945,
+        "coords": {
+            "lat": 43.461,
+            "lng": 1.3266
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Cugnaux",
+        "zip": "31270",
+        "population": 18267,
+        "coords": {
+            "lat": 43.5386,
+            "lng": 1.3322
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Plaisance-du-Touch",
+        "zip": "31830",
+        "population": 18888,
+        "coords": {
+            "lat": 43.565,
+            "lng": 1.2961
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Balma",
+        "zip": "31130",
+        "population": 16569,
+        "coords": {
+            "lat": 43.6125,
+            "lng": 1.4994
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Ramonville-Saint-Agne",
+        "zip": "31520",
+        "population": 14467,
+        "coords": {
+            "lat": 43.5469,
+            "lng": 1.4764
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Castanet-Tolosan",
+        "zip": "31320",
+        "population": 13811,
+        "coords": {
+            "lat": 43.5164,
+            "lng": 1.4986
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Fonsorbes",
+        "zip": "31470",
+        "population": 12036,
+        "coords": {
+            "lat": 43.5369,
+            "lng": 1.2294
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "L'Union",
+        "zip": "31240",
+        "population": 11715,
+        "coords": {
+            "lat": 43.6558,
+            "lng": 1.4853
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Saint-Gaudens",
+        "zip": "31800",
+        "population": 11261,
+        "coords": {
+            "lat": 43.1092,
+            "lng": 0.7228
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Saint-Orens-de-Gameville",
+        "zip": "31650",
+        "population": 11830,
+        "coords": {
+            "lat": 43.5517,
+            "lng": 1.5367
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Saint-Jean",
+        "zip": "31240",
+        "population": 10929,
+        "coords": {
+            "lat": 43.6664,
+            "lng": 1.4997
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Castelginest",
+        "zip": "31780",
+        "population": 10876,
+        "coords": {
+            "lat": 43.6936,
+            "lng": 1.4297
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Portet-sur-Garonne",
+        "zip": "31120",
+        "population": 9791,
+        "coords": {
+            "lat": 43.5239,
+            "lng": 1.4089
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Revel",
+        "zip": "31250",
+        "population": 9665,
+        "coords": {
+            "lat": 43.4586,
+            "lng": 2.0044
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Auterive",
+        "zip": "31190",
+        "population": 9752,
+        "coords": {
+            "lat": 43.3517,
+            "lng": 1.4772
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Saint-Lys",
+        "zip": "31470",
+        "population": 9470,
+        "coords": {
+            "lat": 43.5133,
+            "lng": 1.2269
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Villeneuve-Tolosane",
+        "zip": "31270",
+        "population": 9987,
+        "coords": {
+            "lat": 43.5231,
+            "lng": 1.3417
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Frouzins",
+        "zip": "31270",
+        "population": 9157,
+        "coords": {
+            "lat": 43.5126,
+            "lng": 1.325
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Léguevin",
+        "zip": "31490",
+        "population": 9422,
+        "coords": {
+            "lat": 43.6,
+            "lng": 1.2333
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Seysses",
+        "zip": "31600",
+        "population": 9322,
+        "coords": {
+            "lat": 43.4983,
+            "lng": 1.3125
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Grenade",
+        "zip": "31330",
+        "population": 8943,
+        "coords": {
+            "lat": 43.7667,
+            "lng": 1.2933
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Pibrac",
+        "zip": "31820",
+        "population": 8578,
+        "coords": {
+            "lat": 43.6167,
+            "lng": 1.2833
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Aucamville",
+        "zip": "31140",
+        "population": 8691,
+        "coords": {
+            "lat": 43.65,
+            "lng": 1.4333
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "La Salvetat-Saint-Gilles",
+        "zip": "31880",
+        "population": 8517,
+        "coords": {
+            "lat": 43.5767,
+            "lng": 1.2683
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Aussonne",
+        "zip": "31840",
+        "population": 7187,
+        "coords": {
+            "lat": 43.6833,
+            "lng": 1.3167
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
+        ]
+    },
+    {
+        "name": "Escalquens",
+        "zip": "31750",
+        "population": 6956,
+        "coords": {
+            "lat": 43.5167,
+            "lng": 1.5667
+        },
+        "category": [
+            "france_metropole",
+            "haute_garonne"
         ]
     }
 ]

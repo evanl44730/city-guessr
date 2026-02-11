@@ -33,7 +33,7 @@ export function useGame() {
     const [gameState, setGameState] = useState<GameState>('playing');
     const [currentZoom, setCurrentZoom] = useState(16);
 
-    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack'>('france');
+    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'haute_garonne'>('france');
     const [currentLevelId, setCurrentLevelId] = useState<number>(1);
     const [storyProgress, setStoryProgress] = useState<Record<number, number>>({}); // Level ID -> Best Score (attempts)
 
@@ -182,7 +182,7 @@ export function useGame() {
         });
     };
 
-    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' = 'france', levelId?: number) => {
+    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'haute_garonne' = 'france', levelId?: number) => {
         setGameMode(mode);
 
         if (mode === 'online') {
@@ -195,7 +195,13 @@ export function useGame() {
         setGuesses([]);
         setAttempts(0); // number of attempts made (0 at start)
         setGameState('playing');
-        setCurrentZoom(ZOOM_LEVELS[6]); // 6 attempts remaining
+
+        // Initial Zoom Logic
+        if (mode === 'haute_garonne') {
+            setCurrentZoom(13); // Fixed zoom for town level
+        } else {
+            setCurrentZoom(ZOOM_LEVELS[6]); // 6 attempts remaining
+        }
 
         if (mode === 'time_attack') {
             setScore(0);
@@ -222,6 +228,8 @@ export function useGame() {
             pool = pool.filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
         } else if (mode === 'capital') {
             pool = pool.filter(c => c.category.includes('world_capital'));
+        } else if (mode === 'haute_garonne') {
+            pool = pool.filter(c => c.zip && c.zip.startsWith('31'));
         }
 
         const newTarget = getRandomCity(pool);
@@ -261,7 +269,8 @@ export function useGame() {
             setAttempts(newAttempts);
 
             // Win or Loss logic
-            let isWin = distance < 20;
+            const winThreshold = gameMode === 'haute_garonne' ? 2 : 20;
+            let isWin = distance < winThreshold;
             let isLoss = newAttempts >= 6;
 
             if (isWin) {
@@ -295,15 +304,19 @@ export function useGame() {
                     nextCityTimeAttack();
                 } else {
                     setGameState(gameMode === 'online' ? 'waiting' : 'lost');
-                    setCurrentZoom(4);
+                    if (gameMode !== 'haute_garonne') {
+                        setCurrentZoom(4);
+                    }
                     if (gameMode === 'online') {
                         socket.emit('submit_round', { roomId, attempts: 6 }); // Max penalty
                     }
                 }
             } else {
                 // Update zoom based on remaining attempts
-                const remaining = 6 - newAttempts;
-                setCurrentZoom(ZOOM_LEVELS[remaining] || 4);
+                if (gameMode !== 'haute_garonne') {
+                    const remaining = 6 - newAttempts;
+                    setCurrentZoom(ZOOM_LEVELS[remaining] || 4);
+                }
             }
         }
     }, [gameState, targetCity, guesses, attempts, gameMode, currentLevelId, roomId, nextCityTimeAttack]);

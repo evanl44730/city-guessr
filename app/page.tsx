@@ -49,7 +49,7 @@ export default function Home() {
     startGame
   } = useGame();
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'haute_garonne') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
@@ -167,7 +167,7 @@ export default function Home() {
                     setShowStoryMenu(true);
                   }
                 }}
-                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack'}
+                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack' | 'haute_garonne'}
                 score={score}
                 timeLeft={timeLeft}
                 leaderboard={leaderboard}

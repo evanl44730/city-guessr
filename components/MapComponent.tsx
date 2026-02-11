@@ -137,6 +137,7 @@ export default function MapComponent({ center, zoom, guesses, targetCity, gameSt
             position={[targetCity.coords.lat, targetCity.coords.lng]}
             icon={greenIcon}
             ref={targetMarkerRef}
+            zIndexOffset={1000}
           >
             <Popup autoClose={false} closeOnClick={false}>
               <div className="text-center">
