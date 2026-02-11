@@ -3,7 +3,7 @@ import { CityData } from "@/utils/gameUtils";
 export interface StoryLevel {
     id: number;
     cityName: string;
-    difficulty: 'Easy' | 'Medium' | 'Hard';
+    difficulty: 'Easy' | 'Medium' | 'Hard' | 'Very Hard' | 'Expert';
     minScoreToUnlock: number; // e.g., max attempts allowed (maybe just 'win' is enough)
 }
 
@@ -43,4 +43,28 @@ export const STORY_LEVELS: StoryLevel[] = [
     { id: 28, cityName: "Perpignan", difficulty: "Hard", minScoreToUnlock: 6 },
     { id: 29, cityName: "Metz", difficulty: "Hard", minScoreToUnlock: 6 },
     { id: 30, cityName: "Besançon", difficulty: "Hard", minScoreToUnlock: 6 },
+
+    // Levels 31-40: Very Hard (Notable but slightly smaller/tricky)
+    { id: 31, cityName: "Orléans", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 32, cityName: "Rouen", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 33, cityName: "Mulhouse", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 34, cityName: "Caen", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 35, cityName: "Nancy", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 36, cityName: "Avignon", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 37, cityName: "Poitiers", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 38, cityName: "Dunkerque", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 39, cityName: "La Rochelle", difficulty: "Very Hard", minScoreToUnlock: 6 },
+    { id: 40, cityName: "Pau", difficulty: "Very Hard", minScoreToUnlock: 6 },
+
+    // Levels 41-50: Expert (Smaller regional hubs & specific landmarks)
+    { id: 41, cityName: "Ajaccio", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 42, cityName: "Bastia", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 43, cityName: "Calais", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 44, cityName: "Cannes", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 45, cityName: "Colmar", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 46, cityName: "Bourges", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 47, cityName: "Quimper", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 48, cityName: "Troyes", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 49, cityName: "Chambéry", difficulty: "Expert", minScoreToUnlock: 6 },
+    { id: 50, cityName: "Carcassonne", difficulty: "Expert", minScoreToUnlock: 6 },
 ];

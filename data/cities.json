@@ -983,5 +983,197 @@
         "category": [
             "world_capital"
         ]
+    },
+    {
+        "name": "La Rochelle",
+        "zip": "17000",
+        "population": 79851,
+        "coords": {
+            "lat": 46.1600,
+            "lng": -1.1500
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Pau",
+        "zip": "64000",
+        "population": 80441,
+        "coords": {
+            "lat": 43.3000,
+            "lng": -0.3700
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Calais",
+        "zip": "62100",
+        "population": 67571,
+        "coords": {
+            "lat": 50.9481,
+            "lng": 1.8564
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Cannes",
+        "zip": "06400",
+        "population": 74350,
+        "coords": {
+            "lat": 43.5513,
+            "lng": 7.0128
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Béziers",
+        "zip": "34500",
+        "population": 81545,
+        "coords": {
+            "lat": 43.3476,
+            "lng": 3.2190
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Colmar",
+        "zip": "68000",
+        "population": 66970,
+        "coords": {
+            "lat": 48.0817,
+            "lng": 7.3556
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Bourges",
+        "zip": "18000",
+        "population": 64186,
+        "coords": {
+            "lat": 47.0844,
+            "lng": 2.3964
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Quimper",
+        "zip": "29000",
+        "population": 64385,
+        "coords": {
+            "lat": 47.9967,
+            "lng": -4.0964
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Ajaccio",
+        "zip": "20000",
+        "population": 76320,
+        "coords": {
+            "lat": 41.9267,
+            "lng": 8.7369
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Valence",
+        "zip": "26000",
+        "population": 64458,
+        "coords": {
+            "lat": 44.9333,
+            "lng": 4.8917
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Troyes",
+        "zip": "10000",
+        "population": 62088,
+        "coords": {
+            "lat": 48.2997,
+            "lng": 4.0792
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Chambéry",
+        "zip": "73000",
+        "population": 59964,
+        "coords": {
+            "lat": 45.5665,
+            "lng": 5.9207
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Saint-Malo",
+        "zip": "35400",
+        "population": 47439,
+        "coords": {
+            "lat": 48.6494,
+            "lng": -2.0261
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Bayonne",
+        "zip": "64100",
+        "population": 54306,
+        "coords": {
+            "lat": 43.49,
+            "lng": -1.48
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Bastia",
+        "zip": "20200",
+        "population": 46867,
+        "coords": {
+            "lat": 42.6973,
+            "lng": 9.4509
+        },
+        "category": [
+            "france_metropole"
+        ]
+    },
+    {
+        "name": "Carcassonne",
+        "zip": "11000",
+        "population": 46080,
+        "coords": {
+            "lat": 43.2133,
+            "lng": 2.3508
+        },
+        "category": [
+            "france_metropole"
+        ]
     }
 ]

@@ -70,7 +70,7 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-amber-300 transition-colors">Histoire</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            Relevez le défi ultime. <br /> 30 niveaux de difficulté croissante.
+                            Relevez le défi ultime. <br /> 50 niveaux de difficulté croissante.
                         </p>
                     </button>
 
