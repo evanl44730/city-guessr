@@ -79,6 +79,11 @@ export function useGame() {
         return () => clearInterval(timer);
     }, [gameMode, gameState]);
 
+    // Leaderboard State
+    const [leaderboard, setLeaderboard] = useState<Array<{ username: string, score: number, date: number }>>([]);
+
+    // ... existing code ...
+
     // Socket Events
     useEffect(() => {
         if (!socket) return;
@@ -130,13 +135,28 @@ export function useGame() {
             alert(msg);
         }
 
+        function onLeaderboardUpdate(data: any[]) {
+            setLeaderboard(data);
+        }
+
         socket.on('room_created', onRoomCreated);
         socket.on('room_joined', onRoomJoined);
         socket.on('update_players', onUpdatePlayers);
         socket.on('game_started', onGameStarted);
         socket.on('next_round', onNextRound);
         socket.on('game_over', onGameOver);
+        socket.on('leaderboard_update', onLeaderboardUpdate);
         socket.on('error', onError);
+
+        // Request initial leaderboard
+        if (socket.connected) {
+            socket.emit('get_leaderboard');
+        } else {
+            socket.connect();
+            socket.once('connect', () => {
+                socket.emit('get_leaderboard');
+            });
+        }
 
         return () => {
             socket.off('room_created', onRoomCreated);
@@ -145,6 +165,7 @@ export function useGame() {
             socket.off('game_started', onGameStarted);
             socket.off('next_round', onNextRound);
             socket.off('game_over', onGameOver);
+            socket.off('leaderboard_update', onLeaderboardUpdate);
             socket.off('error', onError);
         };
     }, []);
@@ -262,6 +283,15 @@ export function useGame() {
                 }
             } else if (isLoss) {
                 if (gameMode === 'time_attack') {
+                    // Penalty: -20 seconds for failing to find the city
+                    setTimeLeft(prev => {
+                        const newTime = prev - 20;
+                        if (newTime <= 0) {
+                            setGameState('ended');
+                            return 0;
+                        }
+                        return newTime;
+                    });
                     nextCityTimeAttack();
                 } else {
                     setGameState(gameMode === 'online' ? 'waiting' : 'lost');
@@ -295,6 +325,11 @@ export function useGame() {
         }
     };
 
+    const submitTimeAttackScore = useCallback((username: string) => {
+        if (!socket.connected) socket.connect();
+        socket.emit('submit_score', { username, score });
+    }, [score]);
+
     return {
         targetCity,
         guesses,
@@ -305,8 +340,10 @@ export function useGame() {
         storyProgress,
         score,
         timeLeft,
+        leaderboard, // Export
         submitGuess,
         restartGame,
+        submitTimeAttackScore, // Export
         // Online Exports
         onlinePhase,
         roomId,

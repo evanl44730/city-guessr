@@ -13,11 +13,15 @@ interface GameOverlayProps {
     gameMode: 'france' | 'capital' | 'story' | 'time_attack';
     score?: number;
     timeLeft?: number;
+    leaderboard?: Array<{ username: string, score: number }>;
+    onSubmitScore?: (username: string) => void;
 }
 
-export default function GameOverlay({ attempts, guesses, gameState, targetCity, onRestart, onMenu, gameMode, score = 0, timeLeft = 0 }: GameOverlayProps) {
+export default function GameOverlay({ attempts, guesses, gameState, targetCity, onRestart, onMenu, gameMode, score = 0, timeLeft = 0, leaderboard = [], onSubmitScore }: GameOverlayProps) {
     const isGameOver = gameState !== 'playing';
     const [showHistory, setShowHistory] = useState(false);
+    const [username, setUsername] = useState('');
+    const [hasSubmitted, setHasSubmitted] = useState(false);
 
     // Format time mm:ss
     const formatTime = (seconds: number) => {
@@ -129,14 +133,80 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
 
                         {gameMode === 'time_attack' ? (
                             <>
-                                <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <Trophy className="h-10 w-10 text-red-400" />
+                                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Trophy className="h-8 w-8 text-red-400" />
                                 </div>
-                                <h2 className="text-4xl font-black text-white mb-2 tracking-tight">Temps écoulé !</h2>
-                                <p className="text-slate-400 mb-8 leading-relaxed">
+                                <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Temps écoulé !</h2>
+                                <p className="text-slate-400 mb-6 leading-relaxed">
                                     Score final <br />
-                                    <span className="font-bold text-amber-400 text-3xl block mt-2">{score}</span>
+                                    <span className="font-bold text-amber-400 text-3xl block mt-1">{score}</span>
                                 </p>
+
+                                {/* Leaderboard Section */}
+                                <div className="mb-6 w-full text-left">
+                                    <h3 className="text-white font-bold mb-2 flex items-center gap-2">
+                                        <Trophy className="w-4 h-4 text-amber-400" />
+                                        Classement
+                                    </h3>
+
+                                    <div className="bg-slate-800/50 rounded-xl overflow-hidden mb-4 border border-white/5 max-h-40 overflow-y-auto custom-scrollbar">
+                                        <table className="w-full text-sm text-left">
+                                            <thead className="text-xs text-slate-400 bg-black/20 uppercase">
+                                                <tr>
+                                                    <th className="px-3 py-2">#</th>
+                                                    <th className="px-3 py-2">Joueur</th>
+                                                    <th className="px-3 py-2 text-right">Score</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/5">
+                                                {leaderboard?.map((entry, idx) => (
+                                                    <tr key={idx} className={idx < 3 ? 'bg-amber-400/5' : ''}>
+                                                        <td className="px-3 py-2 font-mono text-slate-500">
+                                                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-slate-200 font-medium truncate max-w-[100px]">{entry.username}</td>
+                                                        <td className="px-3 py-2 text-right font-mono text-amber-400">{entry.score}</td>
+                                                    </tr>
+                                                ))}
+                                                {leaderboard?.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan={3} className="px-3 py-4 text-center text-slate-500 italic">Aucun score pour le moment</td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Submission Form */}
+                                    {!hasSubmitted ? (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Votre pseudo"
+                                                maxLength={15}
+                                                className="bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-white flex-1 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                                                value={username}
+                                                onChange={(e) => setUsername(e.target.value)}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    if (username.trim()) {
+                                                        onSubmitScore?.(username);
+                                                        setHasSubmitted(true);
+                                                    }
+                                                }}
+                                                disabled={!username.trim()}
+                                                className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 font-bold px-4 py-2 rounded-lg transition-colors"
+                                            >
+                                                Envoyer
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center text-green-400 text-sm font-bold bg-green-500/10 py-2 rounded-lg border border-green-500/20">
+                                            ✓ Score envoyé
+                                        </div>
+                                    )}
+                                </div>
                             </>
                         ) : gameState === 'won' ? (
                             <>

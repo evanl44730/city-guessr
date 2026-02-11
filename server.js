@@ -58,6 +58,9 @@ app.prepare().then(() => {
 
     const io = new Server(server);
 
+    // Time Attack Leaderboard (Global)
+    const timeAttackLeaderboard = []; // Array of { username, score, date }
+
     io.on('connection', (socket) => {
         console.log('Client connected:', socket.id);
 
@@ -170,6 +173,29 @@ app.prepare().then(() => {
                     }, 3000);
                 }
             }
+        });
+
+        // Time Attack Leaderboard Events
+        socket.on('submit_score', ({ username, score }) => {
+            // Add new score
+            timeAttackLeaderboard.push({
+                username: username.slice(0, 15), // Limit length
+                score,
+                date: Date.now()
+            });
+
+            // Sort by score (desc) and keep top 100
+            timeAttackLeaderboard.sort((a, b) => b.score - a.score);
+            if (timeAttackLeaderboard.length > 100) {
+                timeAttackLeaderboard.length = 100;
+            }
+
+            // Broadcast update
+            io.emit('leaderboard_update', timeAttackLeaderboard);
+        });
+
+        socket.on('get_leaderboard', () => {
+            socket.emit('leaderboard_update', timeAttackLeaderboard);
         });
 
         socket.on('disconnect', () => {

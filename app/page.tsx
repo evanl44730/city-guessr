@@ -35,6 +35,8 @@ export default function Home() {
     // Time Attack
     score,
     timeLeft,
+    leaderboard,
+    submitTimeAttackScore,
     // Online
     onlinePhase,
     roomId,
@@ -168,6 +170,8 @@ export default function Home() {
                 gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack'}
                 score={score}
                 timeLeft={timeLeft}
+                leaderboard={leaderboard}
+                onSubmitScore={submitTimeAttackScore}
               />
             )}
           </div>
