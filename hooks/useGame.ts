@@ -269,9 +269,9 @@ export function useGame() {
             setAttempts(newAttempts);
 
             // Win or Loss logic
-            const winThreshold = gameMode === 'haute_garonne' ? 2 : 20;
-            let isWin = distance < winThreshold;
-            let isLoss = newAttempts >= 6;
+            // Exact name match required for ALL modes based on user feedback to prevent false positives with nearby cities
+            const isWin = city.name === targetCity.name;
+            const isLoss = newAttempts >= 6;
 
             if (isWin) {
                 if (gameMode === 'time_attack') {
