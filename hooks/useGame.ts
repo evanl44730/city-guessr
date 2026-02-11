@@ -33,9 +33,13 @@ export function useGame() {
     const [gameState, setGameState] = useState<GameState>('playing');
     const [currentZoom, setCurrentZoom] = useState(16);
 
-    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online'>('france');
+    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack'>('france');
     const [currentLevelId, setCurrentLevelId] = useState<number>(1);
     const [storyProgress, setStoryProgress] = useState<Record<number, number>>({}); // Level ID -> Best Score (attempts)
+
+    // Time Attack State
+    const [score, setScore] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(120); // 2 minutes start
 
     // Online State
     const [roomId, setRoomId] = useState<string>('');
@@ -56,6 +60,24 @@ export function useGame() {
             }
         }
     }, []);
+
+    // Timer Logic for Time Attack
+    useEffect(() => {
+        if (gameMode !== 'time_attack' || gameState !== 'playing') return;
+
+        const timer = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setGameState('ended');
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [gameMode, gameState]);
 
     // Socket Events
     useEffect(() => {
@@ -139,7 +161,7 @@ export function useGame() {
         });
     };
 
-    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' = 'france', levelId?: number) => {
+    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' = 'france', levelId?: number) => {
         setGameMode(mode);
 
         if (mode === 'online') {
@@ -153,6 +175,11 @@ export function useGame() {
         setAttempts(0); // number of attempts made (0 at start)
         setGameState('playing');
         setCurrentZoom(ZOOM_LEVELS[6]); // 6 attempts remaining
+
+        if (mode === 'time_attack') {
+            setScore(0);
+            setTimeLeft(120);
+        }
 
         let pool = (citiesData as CityData[]);
 
@@ -169,7 +196,8 @@ export function useGame() {
             }
         }
 
-        if (mode === 'france') {
+        if (mode === 'france' || mode === 'time_attack') {
+            // Force only French cities for Time Attack
             pool = pool.filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
         } else if (mode === 'capital') {
             pool = pool.filter(c => c.category.includes('world_capital'));
@@ -179,8 +207,20 @@ export function useGame() {
         setTargetCity(newTarget);
     }, []);
 
+    const nextCityTimeAttack = useCallback(() => {
+        setGuesses([]);
+        setAttempts(0);
+        setCurrentZoom(ZOOM_LEVELS[6]);
+
+        // Pick new city
+        const pool = (citiesData as CityData[]).filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
+        const newTarget = getRandomCity(pool);
+        setTargetCity(newTarget);
+    }, []);
+
     const submitGuess = useCallback((cityName: string) => {
-        if (gameState !== 'playing' || !targetCity) return;
+        if ((gameState !== 'playing' && gameMode !== 'time_attack') || !targetCity) return;
+        if (gameState === 'ended') return;
 
         const city = (citiesData as CityData[]).find(c => c.name.toLowerCase() === cityName.toLowerCase());
 
@@ -204,18 +244,31 @@ export function useGame() {
             let isLoss = newAttempts >= 6;
 
             if (isWin) {
-                setGameState(gameMode === 'online' ? 'waiting' : 'won');
-                if (gameMode === 'story') {
-                    saveProgress(currentLevelId, newAttempts);
-                }
-                if (gameMode === 'online') {
-                    socket.emit('submit_round', { roomId, attempts: newAttempts });
+                if (gameMode === 'time_attack') {
+                    // Score calculation based on attempts
+                    // 1 attempt = 1000, 2 = 850, 3 = 700...
+                    const points = Math.max(100, 1000 - ((newAttempts - 1) * 150));
+                    setScore(prev => prev + points);
+                    setTimeLeft(prev => prev + 30); // Bonus time
+                    nextCityTimeAttack();
+                } else {
+                    setGameState(gameMode === 'online' ? 'waiting' : 'won');
+                    if (gameMode === 'story') {
+                        saveProgress(currentLevelId, newAttempts);
+                    }
+                    if (gameMode === 'online') {
+                        socket.emit('submit_round', { roomId, attempts: newAttempts });
+                    }
                 }
             } else if (isLoss) {
-                setGameState(gameMode === 'online' ? 'waiting' : 'lost');
-                setCurrentZoom(4);
-                if (gameMode === 'online') {
-                    socket.emit('submit_round', { roomId, attempts: 6 }); // Max penalty
+                if (gameMode === 'time_attack') {
+                    nextCityTimeAttack();
+                } else {
+                    setGameState(gameMode === 'online' ? 'waiting' : 'lost');
+                    setCurrentZoom(4);
+                    if (gameMode === 'online') {
+                        socket.emit('submit_round', { roomId, attempts: 6 }); // Max penalty
+                    }
                 }
             } else {
                 // Update zoom based on remaining attempts
@@ -223,7 +276,7 @@ export function useGame() {
                 setCurrentZoom(ZOOM_LEVELS[remaining] || 4);
             }
         }
-    }, [gameState, targetCity, guesses, attempts, gameMode, currentLevelId, roomId]);
+    }, [gameState, targetCity, guesses, attempts, gameMode, currentLevelId, roomId, nextCityTimeAttack]);
 
     // Online Actions
     const createRoom = (username: string) => {
@@ -250,6 +303,8 @@ export function useGame() {
         currentZoom,
         gameMode,
         storyProgress,
+        score,
+        timeLeft,
         submitGuess,
         restartGame,
         // Online Exports

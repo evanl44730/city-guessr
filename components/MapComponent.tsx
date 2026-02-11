@@ -38,28 +38,39 @@ function MapController({ center, zoom, gameState }: { center: [number, number]; 
   const map = useMap();
 
   useEffect(() => {
-    // 1. Fly to the new view
+    // 1. Clear constraints to allow movement
+    map.setMinZoom(1);
+    map.setMaxBounds(null as any);
+
+    // 2. Fly to the new view
     map.flyTo(center, zoom, {
-      duration: 2
+      duration: 2,
+      easeLinearity: 0.5
     });
 
-    // 2. Set constraints ONLY if playing
+    // 3. Set constraints after movement (or immediately if not playing to ensure responsiveness)
     if (gameState === 'playing') {
-      map.setMinZoom(zoom);
+      const applyConstraints = () => {
+        // Calculate bounds for the current zoom level to restrict panning
+        const delta = 360 / Math.pow(2, zoom) * 1.5;
+        const southWest = L.latLng(center[0] - delta, center[1] - delta);
+        const northEast = L.latLng(center[0] + delta, center[1] + delta);
+        const bounds = L.latLngBounds(southWest, northEast);
 
-      // Calculate bounds for the current zoom level to restrict panning
-      const delta = 360 / Math.pow(2, zoom) * 1.5;
-      const southWest = L.latLng(center[0] - delta, center[1] - delta);
-      const northEast = L.latLng(center[0] + delta, center[1] + delta);
-      const bounds = L.latLngBounds(southWest, northEast);
 
-      map.setMaxBounds(bounds);
-    } else {
-      // Unlock map on Game Over
-      map.setMinZoom(2);
-      map.setMaxBounds(null as any);
+        map.setMinZoom(zoom);
+        map.setMaxBounds(bounds);
+      };
+
+      // Apply constraints only after the fly animation finishes to prevent "shaking"
+      // caused by the current view being outside the new target bounds
+      map.once('moveend', applyConstraints);
+
+      // Cleanup listener if effect re-runs
+      return () => {
+        map.off('moveend', applyConstraints);
+      };
     }
-
   }, [center, zoom, map, gameState]);
 
   return null;
@@ -85,8 +96,8 @@ export default function MapComponent({ center, zoom, guesses, targetCity, gameSt
   return (
     <div className="h-[60vh] w-full relative z-0">
       <MapContainer
-        center={center}
-        zoom={zoom}
+        center={[46.603354, 1.888334]} // Static initial center (France)
+        zoom={6} // Static initial zoom
         scrollWheelZoom={true}
         dragging={true}
         doubleClickZoom={true}

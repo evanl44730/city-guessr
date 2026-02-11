@@ -10,12 +10,21 @@ interface GameOverlayProps {
     targetCity: CityData | null;
     onRestart: () => void;
     onMenu: () => void;
-    gameMode: 'france' | 'capital' | 'story';
+    gameMode: 'france' | 'capital' | 'story' | 'time_attack';
+    score?: number;
+    timeLeft?: number;
 }
 
-export default function GameOverlay({ attempts, guesses, gameState, targetCity, onRestart, onMenu, gameMode }: GameOverlayProps) {
+export default function GameOverlay({ attempts, guesses, gameState, targetCity, onRestart, onMenu, gameMode, score = 0, timeLeft = 0 }: GameOverlayProps) {
     const isGameOver = gameState !== 'playing';
     const [showHistory, setShowHistory] = useState(false);
+
+    // Format time mm:ss
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
 
     return (
         <>
@@ -33,10 +42,23 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                         <div className="w-px h-6 md:h-8 bg-white/10" />
 
                         <div className="flex flex-col items-start gap-1">
+                            {gameMode === 'time_attack' && (
+                                <div className="flex items-center gap-4 px-1 mb-1 border-b border-white/5 pb-1 w-full justify-between">
+                                    <div className={`flex items-center gap-1.5 font-mono text-sm md:text-base font-bold ${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
+                                        <span>⏱️</span>
+                                        {formatTime(timeLeft)}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 font-mono text-sm md:text-base font-bold text-amber-400">
+                                        <span>🏆</span>
+                                        {score}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="flex items-center gap-2">
                                 {gameMode === 'france' ? <Flag className="h-3.5 w-3.5 text-blue-400" /> : gameMode === 'capital' ? <Globe className="h-3.5 w-3.5 text-emerald-400" /> : <Trophy className="h-3.5 w-3.5 text-amber-400" />}
                                 <span className="text-slate-200 font-bold text-[10px] md:text-xs uppercase tracking-wider hidden sm:inline">
-                                    {gameMode === 'france' ? 'France' : gameMode === 'capital' ? 'Monde' : 'Histoire'}
+                                    {gameMode === 'france' ? 'France' : gameMode === 'capital' ? 'Monde' : gameMode === 'time_attack' ? 'Chrono' : 'Histoire'}
                                 </span>
                             </div>
 
@@ -56,10 +78,10 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
             {/* History Box - Top Right */}
             {guesses.length > 0 && (
                 <>
-                    {/* Toggle Button for Mobile */}
+                    {/* Toggle Button for Mobile & Desktop */}
                     <button
                         onClick={() => setShowHistory(!showHistory)}
-                        className={`fixed top-20 right-4 z-30 p-2.5 bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/10 shadow-lg text-slate-300 hover:text-white transition-all active:scale-95 ${showHistory ? 'bg-white/10 text-white ring-1 ring-white/20' : ''}`}
+                        className={`fixed top-20 right-4 z-30 pointer-events-auto p-2.5 bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/10 shadow-lg text-slate-300 hover:text-white transition-all active:scale-95 ${showHistory ? 'bg-white/10 text-white ring-1 ring-white/20' : ''}`}
                     >
                         <History className="h-5 w-5" />
                     </button>
@@ -105,7 +127,18 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                         {/* Status Bar */}
                         <div className={`absolute top-0 left-0 w-full h-2 ${gameState === 'won' ? 'bg-gradient-to-r from-green-400 to-emerald-500 shadow-[0_0_20px_rgba(52,211,153,0.5)]' : 'bg-gradient-to-r from-red-500 to-orange-500 shadow-[0_0_20px_rgba(248,113,113,0.5)]'}`} />
 
-                        {gameState === 'won' ? (
+                        {gameMode === 'time_attack' ? (
+                            <>
+                                <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Trophy className="h-10 w-10 text-red-400" />
+                                </div>
+                                <h2 className="text-4xl font-black text-white mb-2 tracking-tight">Temps écoulé !</h2>
+                                <p className="text-slate-400 mb-8 leading-relaxed">
+                                    Score final <br />
+                                    <span className="font-bold text-amber-400 text-3xl block mt-2">{score}</span>
+                                </p>
+                            </>
+                        ) : gameState === 'won' ? (
                             <>
                                 <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <Trophy className="h-10 w-10 text-green-400" />

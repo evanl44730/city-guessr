@@ -32,6 +32,9 @@ export default function Home() {
     storyProgress,
     submitGuess,
     restartGame,
+    // Time Attack
+    score,
+    timeLeft,
     // Online
     onlinePhase,
     roomId,
@@ -44,7 +47,7 @@ export default function Home() {
     startGame
   } = useGame();
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
@@ -162,7 +165,9 @@ export default function Home() {
                     setShowStoryMenu(true);
                   }
                 }}
-                gameMode={gameMode as 'france' | 'capital' | 'story'}
+                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack'}
+                score={score}
+                timeLeft={timeLeft}
               />
             )}
           </div>
