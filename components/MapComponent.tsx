@@ -131,8 +131,8 @@ export default function MapComponent({ center, zoom, guesses, targetCity, gameSt
           </Marker>
         ))}
 
-        {/* Target City Marker - Show only if Game Over */}
-        {gameState !== 'playing' && targetCity && (
+        {/* Target City Marker - Always visible */}
+        {targetCity && (
           <Marker
             position={[targetCity.coords.lat, targetCity.coords.lng]}
             icon={greenIcon}
@@ -142,7 +142,11 @@ export default function MapComponent({ center, zoom, guesses, targetCity, gameSt
             <Popup autoClose={false} closeOnClick={false}>
               <div className="text-center">
                 <strong className="text-green-600">CIBLE</strong><br />
-                {targetCity.name}
+                {gameState === 'playing' ? (
+                  <span className="text-slate-500 italic">???</span>
+                ) : (
+                  <span className="font-bold">{targetCity.name}</span>
+                )}
               </div>
             </Popup>
           </Marker>
