@@ -11,6 +11,7 @@ import Lobby from '@/components/Lobby';
 import MultiplayerGameOverlay from '@/components/MultiplayerGameOverlay';
 import DepartmentMenu from '@/components/DepartmentMenu';
 import { useGame } from '@/hooks/useGame';
+import { generateStoryLevelsForDepartment } from '@/data/storyLevels';
 
 // Dynamically import MapWrapper to avoid SSR issues with Leaflet
 const MapWrapper = dynamic(() => import('@/components/MapWrapper'), {
@@ -24,7 +25,7 @@ export default function Home() {
   const [showMultiplayerMenu, setShowMultiplayerMenu] = useState(false);
   const [showDepartmentMenu, setShowDepartmentMenu] = useState(false);
 
-  const [storyCategory, setStoryCategory] = useState<'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron'>('france');
+  const [storyCategory, setStoryCategory] = useState<string>('france');
 
   const {
     // ... useGame hook (no change here)
@@ -35,6 +36,8 @@ export default function Home() {
     currentZoom,
     gameMode,
     storyProgress,
+    dynamicStoryLevels,
+    setDynamicStoryLevels,
     submitGuess,
     restartGame,
     // Time Attack
@@ -67,6 +70,21 @@ export default function Home() {
     } else {
       restartGame(mode);
       setInMenu(false);
+    }
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setStoryCategory(category);
+    if (category.startsWith('dept_')) {
+      const depId = category.replace('dept_', '');
+      // Filter cities for this department
+      const depCities = citiesData.filter(c => c.zip && c.zip.startsWith(depId));
+      if (depCities.length > 0) {
+        const levels = generateStoryLevelsForDepartment(depId, depCities);
+        setDynamicStoryLevels(levels);
+      } else {
+        setDynamicStoryLevels([]);
+      }
     }
   };
 
@@ -144,7 +162,8 @@ export default function Home() {
           onBack={handleBackToMenu}
           progress={storyProgress}
           selectedCategory={storyCategory}
-          onSelectCategory={setStoryCategory}
+          onSelectCategory={handleCategorySelect}
+          dynamicLevels={dynamicStoryLevels}
         />
       )}
 
@@ -200,7 +219,7 @@ export default function Home() {
                     setShowStoryMenu(true);
                   }
                 }}
-                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack' | 'haute_garonne'}
+                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack' | 'department'}
                 score={score}
                 timeLeft={timeLeft}
                 leaderboard={leaderboard}

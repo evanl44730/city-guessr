@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { CityData, calculateDistance, calculateDirection, getRandomCity } from '@/utils/gameUtils';
-import { STORY_LEVELS } from '@/data/storyLevels';
+import { STORY_LEVELS, StoryLevel, generateStoryLevelsForDepartment } from '@/data/storyLevels';
 import { socket } from '@/lib/socket';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -37,6 +37,7 @@ export function useGame() {
     const [selectedDepartment, setSelectedDepartment] = useState<string>('31'); // Default to Haute-Garonne
     const [currentLevelId, setCurrentLevelId] = useState<number>(1);
     const [storyProgress, setStoryProgress] = useState<Record<number, number>>({}); // Level ID -> Best Score (attempts)
+    const [dynamicStoryLevels, setDynamicStoryLevels] = useState<StoryLevel[]>([]); // Levels for currently selected department
 
     // Time Attack State
     const [score, setScore] = useState(0);
@@ -245,8 +246,8 @@ export function useGame() {
 
         if (mode === 'story' && levelId) {
             setCurrentLevelId(levelId);
-            // Find city for this level
-            const level = STORY_LEVELS.find(l => l.id === levelId);
+            // Search in static or dynamic levels
+            const level = STORY_LEVELS.find(l => l.id === levelId) || dynamicStoryLevels.find(l => l.id === levelId);
             if (level) {
                 const city = pool.find(c => c.name === level.cityName);
                 if (city) {
@@ -320,12 +321,12 @@ export function useGame() {
                     setGameState(gameMode === 'online' ? 'waiting' : 'won');
                     if (gameMode === 'story') {
                         saveProgress(currentLevelId, newAttempts);
-                        // Unlock next level
-                        const storyLevel = STORY_LEVELS.find(l => l.cityName === targetCity.name);
-                        const storyLevelId = storyLevel?.id;
-                        if (storyLevelId) {
+                        // Store it just by level ID (progress tracking handles unlock)
+                        // If we need the storyLevel to confirm it exists:
+                        const storyLevel = STORY_LEVELS.find(l => l.id === currentLevelId) || dynamicStoryLevels.find(l => l.id === currentLevelId);
+                        if (storyLevel) {
                             setStoryProgress(prev => {
-                                const newProgress = { ...prev, [storyLevelId]: newAttempts };
+                                const newProgress = { ...prev, [storyLevel.id]: newAttempts };
                                 localStorage.setItem('city_guessr_story_progress', JSON.stringify(newProgress));
                                 return newProgress;
                             });
@@ -396,6 +397,8 @@ export function useGame() {
         currentZoom,
         gameMode,
         storyProgress,
+        dynamicStoryLevels, // Export dynamic levels to StoryMenu
+        setDynamicStoryLevels, // to trigger generation when category changes
         score,
         timeLeft,
         leaderboard, // Export

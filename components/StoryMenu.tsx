@@ -1,20 +1,22 @@
 import { useState } from "react";
-import { STORY_LEVELS } from "@/data/storyLevels";
-import { Lock, Star, Check, Map as MapIcon, Globe, LayoutGrid } from "lucide-react";
+import { STORY_LEVELS, StoryLevel } from "@/data/storyLevels";
+import { Lock, Star, Check, Map as MapIcon, Globe, LayoutGrid, ChevronDown } from "lucide-react";
+import { DEPARTMENTS } from "@/data/departments";
+import { CityData } from "@/utils/gameUtils";
 
 interface StoryMenuProps {
     onSelectLevel: (levelId: number) => void;
     onBack: () => void;
     progress: Record<number, number>;
-    selectedCategory: 'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron';
-    onSelectCategory: (category: 'france' | 'capital' | 'haute_garonne' | 'tarn' | 'loire_atlantique' | 'aveyron') => void;
+    selectedCategory: string;
+    onSelectCategory: (category: string) => void;
+    dynamicLevels?: StoryLevel[]; // Passed from useGame for departments
 }
 
-export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCategory, onSelectCategory }: StoryMenuProps) {
-    // Local state removed in favor of props
-    // const [selectedCategory, setSelectedCategory] = useState...
-
-    const filteredLevels = STORY_LEVELS.filter(level => level.category === selectedCategory);
+export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCategory, onSelectCategory, dynamicLevels = [] }: StoryMenuProps) {
+    // If it's a built-in category, use STORY_LEVELS. Otherwise, use dynamicLevels passed from useGame.
+    const isDepartment = selectedCategory !== 'france' && selectedCategory !== 'capital';
+    const filteredLevels = isDepartment ? dynamicLevels : STORY_LEVELS.filter(level => level.category === selectedCategory);
 
     return (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-2 md:p-4 animate-in fade-in duration-300">
@@ -40,72 +42,36 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
                         </button>
                     </div>
 
-                    {/* Category Tabs */}
-                    <div className="flex p-1 bg-slate-900/50 rounded-xl self-start overflow-x-auto max-w-full custom-scrollbar gap-1">
-                        <button
-                            onClick={() => onSelectCategory('france')}
-                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'france'
-                                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
+                    {/* Category Selection Dropdown */}
+                    <div className="flex p-1 bg-slate-900/50 rounded-xl self-start w-full md:w-auto relative group z-20">
+                        <select 
+                            value={selectedCategory}
+                            onChange={(e) => onSelectCategory(e.target.value)}
+                            className="appearance-none w-full md:w-64 bg-slate-800 border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer font-medium shadow-inner"
                         >
-                            <MapIcon className="w-3 h-3 md:w-4 md:h-4" />
-                            France
-                        </button>
-                        <button
-                            onClick={() => onSelectCategory('capital')}
-                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'capital'
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
-                        >
-                            <Globe className="w-3 h-3 md:w-4 md:h-4" />
-                            Monde
-                        </button>
-                        <button
-                            onClick={() => onSelectCategory('haute_garonne')}
-                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'haute_garonne'
-                                ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/25'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
-                        >
-                            <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
-                            Haute-Garonne
-                        </button>
-                        <button
-                            onClick={() => onSelectCategory('tarn')}
-                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'tarn'
-                                ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/25'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
-                        >
-                            <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
-                            Tarn
-                        </button>
-                        <button
-                            onClick={() => onSelectCategory('loire_atlantique')}
-                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'loire_atlantique'
-                                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
-                        >
-                            <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
-                            Loire-Atl.
-                        </button>
-                        <button
-                            onClick={() => onSelectCategory('aveyron')}
-                            className={`flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'aveyron'
-                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
-                        >
-                            <LayoutGrid className="w-3 h-3 md:w-4 md:h-4" />
-                            Aveyron
-                        </button>
+                            <optgroup label="Modes Principaux">
+                                <option value="france">🇫🇷 France (Villes Majeures)</option>
+                                <option value="capital">🌍 Monde (Capitales)</option>
+                            </optgroup>
+                            <optgroup label="Explorer les 101 Départements">
+                                {DEPARTMENTS.map(dep => (
+                                    <option key={dep.id} value={`dept_${dep.id}`}>
+                                        {dep.id} - {dep.name} ({dep.region})
+                                    </option>
+                                ))}
+                            </optgroup>
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-white transition-colors h-5 w-5" />
                     </div>
                 </div>
 
                 {/* Levels Grid */}
+                {filteredLevels.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 min-h-[300px]">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+                        <p>Chargement des villes du département...</p>
+                    </div>
+                ) : (
                 <div className="overflow-y-auto grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-4 p-1 md:p-2 custom-scrollbar flex-1 min-h-0">
                     {filteredLevels.map((level) => {
                         // Unlock logic:
@@ -166,6 +132,7 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
                         );
                     })}
                 </div>
+                )}
             </div>
         </div>
     );
