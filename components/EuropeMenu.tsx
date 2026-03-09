@@ -77,7 +77,16 @@ export default function EuropeMenu({ onSelectCountry, onBack }: EuropeMenuProps)
                                 className="group flex flex-col items-start p-4 bg-white/5 border border-white/10 hover:border-emerald-500/30 rounded-2xl hover:bg-emerald-500/10 transition-all text-left shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-1 active:scale-95"
                             >
                                 <div className="flex items-center justify-between w-full mb-1">
-                                    <div className="text-4xl leading-none">{country.emoji}</div>
+                                    <div className="text-4xl leading-none">
+                                        {/* Use FlagCDN for Windows compatibility instead of emojis */}
+                                        <img 
+                                            src={`https://flagcdn.com/w80/${country.id.toLowerCase()}.png`}
+                                            srcSet={`https://flagcdn.com/w160/${country.id.toLowerCase()}.png 2x`}
+                                            alt={`Drapeau ${country.name}`}
+                                            className="h-8 w-auto rounded-[4px] shadow-sm border border-white/10"
+                                            loading="lazy"
+                                        />
+                                    </div>
                                     <span className="text-xs font-mono font-bold text-slate-500 bg-black/20 px-2 py-1 rounded-lg">
                                         {country.id}
                                     </span>

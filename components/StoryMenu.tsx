@@ -112,10 +112,21 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
 
                         {/* Specific Category Dropdown */}
                         <div className="flex p-1 bg-slate-900/50 rounded-xl relative group w-full md:w-2/3">
+                            {/* Selected Europe Flag Overlay */}
+                            {regionType === 'europe' && selectedCategory.startsWith('country_') && (
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                                    <img 
+                                        src={`https://flagcdn.com/w40/${selectedCategory.replace('country_', '').toLowerCase()}.png`}
+                                        srcSet={`https://flagcdn.com/w80/${selectedCategory.replace('country_', '').toLowerCase()}.png 2x`}
+                                        alt=""
+                                        className="h-5 w-auto rounded-[2px] shadow-sm border border-white/10"
+                                    />
+                                </div>
+                            )}
                             <select 
                                 value={selectedCategory}
                                 onChange={(e) => onSelectCategory(e.target.value)}
-                                className="appearance-none w-full bg-slate-800 border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer font-medium shadow-inner"
+                                className={`appearance-none w-full bg-slate-800 border border-white/10 text-white rounded-lg py-2.5 pr-10 outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer font-medium shadow-inner ${regionType === 'europe' ? 'pl-12' : 'pl-4'}`}
                             >
                                 {regionType === 'main' && (
                                     <>
@@ -148,11 +159,16 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
                     </div>
                 ) : (
                 <div className="overflow-y-auto grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-4 p-1 md:p-2 custom-scrollbar flex-1 min-h-0">
-                    {filteredLevels.map((level) => {
+                    {filteredLevels.map((level, index) => {
                         // Unlock logic:
-                        // First level of each category is always unlocked.
-                        const isFirstLevel = level.id === 1 || level.id === 101 || level.id === 201 || level.id === 301 || level.id === 401 || level.id === 501;
-                        const isUnlocked = isFirstLevel || progress[level.id - 1] !== undefined;
+                        // First level of the currently selected category is always unlocked.
+                        const isFirstLevel = index === 0;
+                        
+                        // A level is unlocked if it's the first level OR if the PREVIOUS level in THIS category is completed.
+                        // We check the previous level's ID in the filtered array instead of just `level.id - 1`
+                        // to handle dynamic gaps (like dept_31 having IDs 31001, 31002, etc.)
+                        const previousLevelInCat = index > 0 ? filteredLevels[index - 1] : null;
+                        const isUnlocked = isFirstLevel || (previousLevelInCat && progress[previousLevelInCat.id] !== undefined);
 
                         const isCompleted = progress[level.id] !== undefined;
                         const bestScore = progress[level.id];
