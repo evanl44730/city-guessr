@@ -33,8 +33,9 @@ export function useGame() {
     const [gameState, setGameState] = useState<GameState>('playing');
     const [currentZoom, setCurrentZoom] = useState(16);
 
-    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department'>('france');
+    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe'>('france');
     const [selectedDepartment, setSelectedDepartment] = useState<string>('31'); // Default to Haute-Garonne
+    const [selectedCountry, setSelectedCountry] = useState<string>('FR'); // Default to France
     const [currentLevelId, setCurrentLevelId] = useState<number>(1);
     const [storyProgress, setStoryProgress] = useState<Record<number, number>>({}); // Level ID -> Best Score (attempts)
     const [dynamicStoryLevels, setDynamicStoryLevels] = useState<StoryLevel[]>([]); // Levels for currently selected department
@@ -55,16 +56,41 @@ export function useGame() {
     const [citiesData, setCitiesData] = useState<CityData[]>([]);
     const [isCitiesLoaded, setIsCitiesLoaded] = useState(false);
 
-    // Fetch cities from Supabase
+    // Fetch cities from Supabase (handling > 1000 rows pagination)
     useEffect(() => {
-        async function fetchCities() {
-            setGameState('waiting'); // Show some kind of loading or prevent actions
-            const { data, error } = await supabase.from('cities').select('*');
-            if (error) {
-                console.error('Error fetching cities:', error);
-            } else if (data) {
-                // Formatting data back to CityData structure
-                const formattedCities: CityData[] = data.map((row: any) => ({
+        async function fetchAllCities() {
+            setGameState('waiting');
+            let allCities: any[] = [];
+            let hasMore = true;
+            let page = 0;
+            const pageSize = 1000;
+
+            while (hasMore) {
+                const { data, error } = await supabase
+                    .from('cities')
+                    .select('*')
+                    .range(page * pageSize, (page + 1) * pageSize - 1);
+
+                if (error) {
+                    console.error('Error fetching cities:', error);
+                    break;
+                }
+
+                if (data && data.length > 0) {
+                    allCities = [...allCities, ...data];
+                    page++;
+                    // If we get exactly 1000, there MIGHT be more. If less, we're definitely at the end.
+                    if (data.length < pageSize) {
+                        hasMore = false;
+                    }
+                } else {
+                    hasMore = false;
+                }
+            }
+
+            if (allCities.length > 0) {
+                console.log(`[useGame] Loaded ${allCities.length} cities from Supabase.`);
+                const formattedCities: CityData[] = allCities.map((row: any) => ({
                     name: row.name,
                     zip: row.zip || '',
                     population: row.population || 0,
@@ -73,11 +99,9 @@ export function useGame() {
                 }));
                 setCitiesData(formattedCities);
                 setIsCitiesLoaded(true);
-                // Restart a game to set the target city now that data is loaded
-                // Actually restartGame depends on this, so we handle it below
             }
         }
-        fetchCities();
+        fetchAllCities();
     }, []);
 
     // Load progress on mount
@@ -213,9 +237,10 @@ export function useGame() {
         });
     };
 
-    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' = 'france', levelId?: number, departmentId?: string) => {
+    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' = 'france', levelId?: number, departmentId?: string, countryId?: string) => {
         setGameMode(mode);
         if (departmentId) setSelectedDepartment(departmentId);
+        if (countryId) setSelectedCountry(countryId);
 
         if (mode === 'online') {
             socket.connect();
@@ -265,6 +290,9 @@ export function useGame() {
         } else if (mode === 'department') {
             const dep = departmentId || selectedDepartment;
             pool = pool.filter(c => c.zip && c.zip.startsWith(dep));
+        } else if (mode === 'europe') {
+            const country = countryId || selectedCountry;
+            pool = pool.filter(c => c.category && c.category.includes(`country_${country}`));
         }
 
         const newTarget = getRandomCity(pool);

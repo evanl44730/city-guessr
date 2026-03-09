@@ -147,3 +147,32 @@ export function generateStoryLevelsForDepartment(departmentId: string, cities: C
         };
     });
 }
+
+/**
+ * Generate StoryLevels for a specific country (5 levels)
+ */
+export function generateStoryLevelsForCountry(countryId: string, cities: CityData[]): StoryLevel[] {
+    const categoryName = `country_${countryId}`;
+
+    const sortedCities = [...cities].sort((a, b) => b.population - a.population);
+    
+    // Country IDs are strings like "IT", we need a reliable numeric hash to avoid ID collisions
+    // Simple hash: charCodeAt(0) * 1000 + charCodeAt(1) * 10
+    const hash = (countryId.charCodeAt(0) * 1000) + (countryId.charCodeAt(1) * 10);
+    
+    return sortedCities.slice(0, 5).map((city, index) => {
+        let difficulty: StoryLevel['difficulty'] = 'Easy';
+        if (index === 1) difficulty = 'Medium';
+        if (index === 2) difficulty = 'Hard';
+        if (index === 3) difficulty = 'Very Hard';
+        if (index === 4) difficulty = 'Expert';
+
+        return {
+            id: hash + index + 1, // e.g., 73841, 73842...
+            cityName: city.name,
+            difficulty,
+            minScoreToUnlock: 6,
+            category: categoryName
+        };
+    });
+}

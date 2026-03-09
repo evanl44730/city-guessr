@@ -11,7 +11,8 @@ import Lobby from '@/components/Lobby';
 import MultiplayerGameOverlay from '@/components/MultiplayerGameOverlay';
 import DepartmentMenu from '@/components/DepartmentMenu';
 import { useGame } from '@/hooks/useGame';
-import { generateStoryLevelsForDepartment } from '@/data/storyLevels';
+import { generateStoryLevelsForDepartment, generateStoryLevelsForCountry } from '@/data/storyLevels';
+import EuropeMenu from '@/components/EuropeMenu';
 
 // Dynamically import MapWrapper to avoid SSR issues with Leaflet
 const MapWrapper = dynamic(() => import('@/components/MapWrapper'), {
@@ -24,6 +25,7 @@ export default function Home() {
   const [showStoryMenu, setShowStoryMenu] = useState(false);
   const [showMultiplayerMenu, setShowMultiplayerMenu] = useState(false);
   const [showDepartmentMenu, setShowDepartmentMenu] = useState(false);
+  const [showEuropeMenu, setShowEuropeMenu] = useState(false);
 
   const [storyCategory, setStoryCategory] = useState<string>('france');
 
@@ -59,7 +61,7 @@ export default function Home() {
     isCitiesLoaded
   } = useGame();
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
@@ -67,6 +69,8 @@ export default function Home() {
       restartGame('online');
     } else if (mode === 'department') {
       setShowDepartmentMenu(true);
+    } else if (mode === 'europe') {
+      setShowEuropeMenu(true);
     } else {
       restartGame(mode);
       setInMenu(false);
@@ -81,6 +85,15 @@ export default function Home() {
       const depCities = citiesData.filter(c => c.zip && c.zip.startsWith(depId));
       if (depCities.length > 0) {
         const levels = generateStoryLevelsForDepartment(depId, depCities);
+        setDynamicStoryLevels(levels);
+      } else {
+        setDynamicStoryLevels([]);
+      }
+    } else if (category.startsWith('country_')) {
+      const countryId = category.replace('country_', '');
+      const countryCities = citiesData.filter(c => c.category && c.category.includes(`country_${countryId}`));
+      if (countryCities.length > 0) {
+        const levels = generateStoryLevelsForCountry(countryId, countryCities);
         setDynamicStoryLevels(levels);
       } else {
         setDynamicStoryLevels([]);
@@ -100,10 +113,17 @@ export default function Home() {
     setInMenu(false);
   };
 
+  const handleEuropeSelect = (countryId: string) => {
+    restartGame('europe', undefined, undefined, countryId);
+    setShowEuropeMenu(false);
+    setInMenu(false);
+  };
+
   const handleBackToMenu = () => {
     setShowStoryMenu(false);
     setShowMultiplayerMenu(false);
     setShowDepartmentMenu(false);
+    setShowEuropeMenu(false);
     setInMenu(true);
     restartGame('france'); // Reset to default mode to clear online state if needed
   };
@@ -154,7 +174,7 @@ export default function Home() {
         </div>
       )}
 
-      {inMenu && !showStoryMenu && !showMultiplayerMenu && <MainMenu onSelectMode={handleStartGame} />}
+      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && <MainMenu onSelectMode={handleStartGame} />}
 
       {showStoryMenu && (
         <StoryMenu
@@ -170,6 +190,13 @@ export default function Home() {
       {showDepartmentMenu && (
         <DepartmentMenu
           onSelectDepartment={handleDepartmentSelect}
+          onBack={handleBackToMenu}
+        />
+      )}
+
+      {showEuropeMenu && (
+        <EuropeMenu
+          onSelectCountry={handleEuropeSelect}
           onBack={handleBackToMenu}
         />
       )}
@@ -219,7 +246,7 @@ export default function Home() {
                     setShowStoryMenu(true);
                   }
                 }}
-                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack' | 'department'}
+                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack' | 'department' | 'europe'}
                 score={score}
                 timeLeft={timeLeft}
                 leaderboard={leaderboard}
