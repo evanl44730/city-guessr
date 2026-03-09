@@ -14,22 +14,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
 const port = process.env.PORT || 3000;
-// when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 // Game State
-const rooms = new Map(); // RoomID -> RoomState
-// RoomState: {
-//   id: string,
-//   hostId: string,
-//   players: Map<socketId, { id: string, username: string, score: number, attempts: number, finishedRound: boolean, totalAttempts: number }>,
-//   gameState: 'lobby' | 'playing' | 'ended',
-//   currentRound: number,
-//   maxRounds: number,
-//   cities: Array<City>, // The list of 10 cities for the game
-//   startTime: number
-// }
+const rooms = new Map();
 
 // Helper to generate a random 4-letter room code
 function generateRoomCode() {
@@ -44,33 +33,75 @@ function generateRoomCode() {
 // Server-side Cities State
 let citiesData = [];
 
-// Fetch initial data
+// Fetch all cities with pagination (same fix as client-side)
 async function loadCities() {
     try {
-        const { data, error } = await supabase.from('cities').select('*');
-        if (error) throw error;
-        if (data) {
-            citiesData = data;
-            console.log(`[Server] Loaded ${citiesData.length} cities from Supabase.`);
+        let allCities = [];
+        let hasMore = true;
+        let page = 0;
+        const pageSize = 1000;
+
+        while (hasMore) {
+            const { data, error } = await supabase
+                .from('cities')
+                .select('*')
+                .range(page * pageSize, (page + 1) * pageSize - 1);
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                allCities = [...allCities, ...data];
+                page++;
+                if (data.length < pageSize) hasMore = false;
+            } else {
+                hasMore = false;
+            }
         }
+
+        citiesData = allCities;
+        console.log(`[Server] Loaded ${citiesData.length} cities from Supabase.`);
     } catch (err) {
         console.error('[Server] Failed to load cities from Supabase:', err.message);
     }
 }
 
-// Ensure cities are loaded when the server starts
 loadCities();
 
-function getRandomCities(count) {
+/**
+ * Get random cities filtered by categories
+ * @param {number} count - Number of cities to return
+ * @param {string[]} categories - Category filters (e.g. ['france_metropole', 'country_ES', 'world_capital'])
+ */
+function getRandomCities(count, categories = []) {
     if (citiesData.length === 0) return [];
-    
-    // Convert DB structure mapping slightly if needed, assuming the table structure has category as text[]
-    const frenchCities = citiesData.filter(city =>
-        city.category && (city.category.includes('france_metropole') || city.category.includes('france_dom'))
-    );
-    const shuffled = [...frenchCities].sort(() => 0.5 - Math.random());
-    
-    // Map back to CityData format expected by client
+
+    let pool = citiesData;
+
+    // Filter by categories if provided
+    if (categories.length > 0) {
+        pool = citiesData.filter(city => {
+            if (!city.category) return false;
+            // A city matches if ANY of its categories appears in the requested categories
+            return categories.some(cat => city.category.includes(cat));
+        });
+    } else {
+        // Default: French cities only (backward compat)
+        pool = citiesData.filter(city =>
+            city.category && (city.category.includes('france_metropole') || city.category.includes('france_dom'))
+        );
+    }
+
+    if (pool.length === 0) {
+        console.warn('[Server] No cities match the requested categories:', categories);
+        // Fallback to French cities
+        pool = citiesData.filter(city =>
+            city.category && (city.category.includes('france_metropole') || city.category.includes('france_dom'))
+        );
+    }
+
+    const shuffled = [...pool].sort(() => 0.5 - Math.random());
+
+    // Map to CityData format expected by client
     return shuffled.slice(0, count).map(row => ({
         name: row.name,
         zip: row.zip || '',
@@ -79,6 +110,12 @@ function getRandomCities(count) {
         category: row.category || []
     }));
 }
+
+// Default game settings
+const DEFAULT_SETTINGS = {
+    categories: ['france_metropole', 'france_dom'],
+    rounds: 10
+};
 
 app.prepare().then(() => {
     const server = createServer(async (req, res) => {
@@ -95,7 +132,7 @@ app.prepare().then(() => {
     const io = new Server(server);
 
     // Time Attack Leaderboard (Global)
-    const timeAttackLeaderboard = []; // Array of { username, score, date }
+    const timeAttackLeaderboard = [];
 
     io.on('connection', (socket) => {
         console.log('Client connected:', socket.id);
@@ -118,7 +155,8 @@ app.prepare().then(() => {
                 players,
                 gameState: 'lobby',
                 currentRound: 0,
-                maxRounds: 10,
+                maxRounds: DEFAULT_SETTINGS.rounds,
+                settings: { ...DEFAULT_SETTINGS },
                 cities: [],
                 startTime: Date.now()
             });
@@ -126,6 +164,8 @@ app.prepare().then(() => {
             socket.join(roomId);
             socket.emit('room_created', { roomId });
             io.to(roomId).emit('update_players', Array.from(players.values()));
+            // Send initial settings to the host
+            socket.emit('settings_updated', { ...DEFAULT_SETTINGS });
         });
 
         socket.on('join_room', ({ roomId, username }) => {
@@ -151,6 +191,27 @@ app.prepare().then(() => {
             socket.join(roomId.toUpperCase());
             socket.emit('room_joined', { roomId: roomId.toUpperCase() });
             io.to(roomId.toUpperCase()).emit('update_players', Array.from(room.players.values()));
+            // Send current settings to the joining player
+            socket.emit('settings_updated', room.settings);
+        });
+
+        // Host updates game settings
+        socket.on('update_settings', ({ roomId, settings }) => {
+            const room = rooms.get(roomId);
+            if (!room || room.hostId !== socket.id) return;
+            if (room.gameState !== 'lobby') return;
+
+            // Validate and apply settings
+            if (settings.categories && Array.isArray(settings.categories) && settings.categories.length > 0) {
+                room.settings.categories = settings.categories;
+            }
+            if (settings.rounds && [5, 10, 15, 20].includes(settings.rounds)) {
+                room.settings.rounds = settings.rounds;
+                room.maxRounds = settings.rounds;
+            }
+
+            // Broadcast updated settings to all players in the room
+            io.to(roomId).emit('settings_updated', room.settings);
         });
 
         socket.on('start_game', ({ roomId }) => {
@@ -158,7 +219,7 @@ app.prepare().then(() => {
             if (!room || room.hostId !== socket.id) return;
 
             room.gameState = 'playing';
-            room.cities = getRandomCities(room.maxRounds);
+            room.cities = getRandomCities(room.maxRounds, room.settings.categories);
             room.currentRound = 1;
 
             io.to(roomId).emit('game_started', {
@@ -175,13 +236,11 @@ app.prepare().then(() => {
             if (player) {
                 player.attempts = attempts;
                 player.totalAttempts += attempts;
-                // Calculate score: Base 1000 - (attempts * 100). Min 0.
                 const roundScore = Math.max(0, 1000 - ((attempts - 1) * 150));
                 player.score += roundScore;
                 player.finishedRound = true;
             }
 
-            // Check if all players finished
             const allFinished = Array.from(room.players.values()).every(p => p.finishedRound);
 
             io.to(roomId).emit('update_players', Array.from(room.players.values()));
@@ -193,7 +252,6 @@ app.prepare().then(() => {
                         players: Array.from(room.players.values()).sort((a, b) => b.score - a.score)
                     });
                 } else {
-                    // Send next round after a delay
                     setTimeout(() => {
                         room.currentRound++;
                         room.players.forEach(p => {
@@ -212,21 +270,17 @@ app.prepare().then(() => {
         });
 
         // Time Attack Leaderboard Events
-        // Time Attack Leaderboard Events
         socket.on('submit_score', ({ username, score }) => {
-            const cleanUsername = username.slice(0, 15); // Limit length
+            const cleanUsername = username.slice(0, 15);
 
-            // Check if user already exists
             const existingEntryIndex = timeAttackLeaderboard.findIndex(entry => entry.username === cleanUsername);
 
             if (existingEntryIndex !== -1) {
-                // User exists, update score only if higher
                 if (score > timeAttackLeaderboard[existingEntryIndex].score) {
                     timeAttackLeaderboard[existingEntryIndex].score = score;
                     timeAttackLeaderboard[existingEntryIndex].date = Date.now();
                 }
             } else {
-                // New user
                 timeAttackLeaderboard.push({
                     username: cleanUsername,
                     score,
@@ -234,13 +288,11 @@ app.prepare().then(() => {
                 });
             }
 
-            // Sort by score (desc) and keep top 100
             timeAttackLeaderboard.sort((a, b) => b.score - a.score);
             if (timeAttackLeaderboard.length > 100) {
                 timeAttackLeaderboard.length = 100;
             }
 
-            // Broadcast update
             io.emit('leaderboard_update', timeAttackLeaderboard);
         });
 
@@ -250,7 +302,6 @@ app.prepare().then(() => {
 
         socket.on('disconnect', () => {
             console.log('Client disconnected:', socket.id);
-            // Handle cleanup logic if needed (remove player from room, delete empty room)
             rooms.forEach((room, roomId) => {
                 if (room.players.has(socket.id)) {
                     room.players.delete(socket.id);
@@ -258,7 +309,6 @@ app.prepare().then(() => {
                         rooms.delete(roomId);
                     } else {
                         io.to(roomId).emit('update_players', Array.from(room.players.values()));
-                        // Host migration logic could go here
                     }
                 }
             });

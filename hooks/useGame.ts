@@ -52,6 +52,12 @@ export function useGame() {
     const [totalRounds, setTotalRounds] = useState(10);
     const [onlinePhase, setOnlinePhase] = useState<'menu' | 'lobby' | 'game'>('menu');
 
+    // Multiplayer Game Settings
+    const [gameSettings, setGameSettings] = useState<{ categories: string[]; rounds: number }>({
+        categories: ['france_metropole', 'france_dom'],
+        rounds: 10
+    });
+
     // Supabase Cities State
     const [citiesData, setCitiesData] = useState<CityData[]>([]);
     const [isCitiesLoaded, setIsCitiesLoaded] = useState(false);
@@ -201,6 +207,9 @@ export function useGame() {
         socket.on('next_round', onNextRound);
         socket.on('game_over', onGameOver);
         socket.on('leaderboard_update', onLeaderboardUpdate);
+        socket.on('settings_updated', (settings: { categories: string[]; rounds: number }) => {
+            setGameSettings(settings);
+        });
         socket.on('error', onError);
 
         // Request initial leaderboard
@@ -221,6 +230,7 @@ export function useGame() {
             socket.off('next_round', onNextRound);
             socket.off('game_over', onGameOver);
             socket.off('leaderboard_update', onLeaderboardUpdate);
+            socket.off('settings_updated');
             socket.off('error', onError);
         };
     }, []);
@@ -424,6 +434,12 @@ export function useGame() {
         }
     };
 
+    const updateGameSettings = (newSettings: { categories: string[]; rounds: number }) => {
+        if (isHost && roomId) {
+            socket.emit('update_settings', { roomId, settings: newSettings });
+        }
+    };
+
     const submitTimeAttackScore = useCallback((username: string) => {
         if (!socket.connected) socket.connect();
         socket.emit('submit_score', { username, score });
@@ -439,14 +455,14 @@ export function useGame() {
         selectedDepartment,
         selectedCountry,
         storyProgress,
-        dynamicStoryLevels, // Export dynamic levels to StoryMenu
-        setDynamicStoryLevels, // to trigger generation when category changes
+        dynamicStoryLevels,
+        setDynamicStoryLevels,
         score,
         timeLeft,
-        leaderboard, // Export
+        leaderboard,
         submitGuess,
         restartGame,
-        submitTimeAttackScore, // Export
+        submitTimeAttackScore,
         // Online Exports
         onlinePhase,
         roomId,
@@ -457,6 +473,8 @@ export function useGame() {
         createRoom,
         joinRoom,
         startGame,
+        gameSettings,
+        updateGameSettings,
         citiesData,
         isCitiesLoaded
     };

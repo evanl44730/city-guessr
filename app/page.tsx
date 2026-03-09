@@ -60,7 +60,9 @@ export default function Home() {
     citiesData,
     isCitiesLoaded,
     selectedDepartment,
-    selectedCountry
+    selectedCountry,
+    gameSettings,
+    updateGameSettings
   } = useGame();
 
   // Filter the search suggestions based on the current game mode
@@ -183,7 +185,9 @@ export default function Home() {
           roomId={roomId}
           players={players}
           isHost={isHost}
+          settings={gameSettings}
           onStartGame={startGame}
+          onUpdateSettings={updateGameSettings}
         />
       );
     }
