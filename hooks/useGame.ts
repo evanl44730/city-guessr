@@ -274,7 +274,19 @@ export function useGame() {
             // Search in static or dynamic levels
             const level = STORY_LEVELS.find(l => l.id === levelId) || dynamicStoryLevels.find(l => l.id === levelId);
             if (level) {
-                const city = pool.find(c => c.name === level.cityName);
+                // Fix name collisions (e.g. "Paris" in France vs "Paris" in USA/Europe)
+                // by matching the level's specific category if it's a dynamic mode.
+                const city = pool.find(c => {
+                    if (c.name !== level.cityName) return false;
+                    
+                    // For dynamic categories (departments and countries), enforce exact category match
+                    if (level.category.startsWith('dept_') || level.category.startsWith('country_')) {
+                        return c.category.includes(level.category);
+                    }
+                    
+                    return true; // Fallback for classic 'france' / 'capital'
+                });
+                
                 if (city) {
                     setTargetCity(city);
                     return;
@@ -297,7 +309,7 @@ export function useGame() {
 
         const newTarget = getRandomCity(pool);
         setTargetCity(newTarget);
-    }, [selectedDepartment, citiesData]);
+    }, [selectedDepartment, selectedCountry, citiesData, dynamicStoryLevels]);
 
     const nextCityTimeAttack = useCallback(() => {
         if (citiesData.length === 0) return;
@@ -424,6 +436,8 @@ export function useGame() {
         gameState,
         currentZoom,
         gameMode,
+        selectedDepartment,
+        selectedCountry,
         storyProgress,
         dynamicStoryLevels, // Export dynamic levels to StoryMenu
         setDynamicStoryLevels, // to trigger generation when category changes

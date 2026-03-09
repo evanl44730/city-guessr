@@ -12,10 +12,20 @@ export interface Coordinates {
 }
 
 export const calculateDistance = (from: Coordinates, to: Coordinates): number => {
-    return getDistance(
-        { latitude: from.lat, longitude: from.lng },
-        { latitude: to.lat, longitude: to.lng }
-    ) / 1000; // Convert meters to km
+    const toRadian = (degree: number) => (degree * Math.PI) / 180;
+    
+    // Haversine formula
+    const R = 6371; // Earth's radius in km
+    const dLat = toRadian(to.lat - from.lat);
+    const dLon = toRadian(to.lng - from.lng);
+    const lat1 = toRadian(from.lat);
+    const lat2 = toRadian(to.lat);
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    
+    return R * c; // Distance in km
 };
 
 export const calculateDirection = (from: Coordinates, to: Coordinates): string => {

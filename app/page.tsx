@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import SearchInput from '@/components/SearchInput';
 import GameOverlay from '@/components/GameOverlay';
@@ -58,8 +58,37 @@ export default function Home() {
     joinRoom,
     startGame,
     citiesData,
-    isCitiesLoaded
+    isCitiesLoaded,
+    selectedDepartment,
+    selectedCountry
   } = useGame();
+
+  // Filter the search suggestions based on the current game mode
+  const filteredSearchPool = useMemo(() => {
+    if (gameMode === 'france' || gameMode === 'time_attack') {
+      return citiesData.filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
+    } else if (gameMode === 'capital') {
+      return citiesData.filter(c => c.category.includes('world_capital'));
+    } else if (gameMode === 'department') {
+      return citiesData.filter(c => c.zip && c.zip.startsWith(selectedDepartment));
+    } else if (gameMode === 'europe') {
+      return citiesData.filter(c => c.category && c.category.includes(`country_${selectedCountry}`));
+    } else if (gameMode === 'story') {
+      // For story mode, filter by the current story category
+      if (storyCategory.startsWith('dept_')) {
+        const depId = storyCategory.replace('dept_', '');
+        return citiesData.filter(c => c.zip && c.zip.startsWith(depId));
+      } else if (storyCategory.startsWith('country_')) {
+        const countryId = storyCategory.replace('country_', '');
+        return citiesData.filter(c => c.category && c.category.includes(`country_${countryId}`));
+      } else if (storyCategory === 'capital') {
+        return citiesData.filter(c => c.category.includes('world_capital'));
+      } else {
+        return citiesData.filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
+      }
+    }
+    return citiesData;
+  }, [gameMode, citiesData, selectedDepartment, selectedCountry, storyCategory]);
 
   const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe') => {
     if (mode === 'story') {
@@ -209,7 +238,7 @@ export default function Home() {
 
           <div className="w-full max-w-md z-50 pointer-events-auto px-4 md:px-0">
             <SearchInput
-              citiesData={citiesData}
+              citiesData={filteredSearchPool}
               onSelect={submitGuess}
               disabled={gameState !== 'playing'}
             />
