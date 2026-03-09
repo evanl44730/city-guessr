@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useMemo } from 'react';
-import citiesData from '@/data/cities.json';
 import { Search } from 'lucide-react';
+import { CityData } from '@/utils/gameUtils';
 
 interface SearchInputProps {
+    citiesData: CityData[];
     onSelect: (cityName: string) => void;
     disabled?: boolean;
 }
 
-export default function SearchInput({ onSelect, disabled }: SearchInputProps) {
+export default function SearchInput({ citiesData, onSelect, disabled }: SearchInputProps) {
     const [query, setQuery] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
 

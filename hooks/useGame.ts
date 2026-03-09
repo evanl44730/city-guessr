@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useCallback, useEffect } from 'react';
-import citiesData from '@/data/cities.json';
 import { CityData, calculateDistance, calculateDirection, getRandomCity } from '@/utils/gameUtils';
 import { STORY_LEVELS } from '@/data/storyLevels';
 import { socket } from '@/lib/socket';
+import { supabase } from '@/lib/supabaseClient';
 
 export type GameState = 'playing' | 'won' | 'lost' | 'waiting' | 'ended';
 
@@ -49,6 +49,35 @@ export function useGame() {
     const [currentRound, setCurrentRound] = useState(0);
     const [totalRounds, setTotalRounds] = useState(10);
     const [onlinePhase, setOnlinePhase] = useState<'menu' | 'lobby' | 'game'>('menu');
+
+    // Supabase Cities State
+    const [citiesData, setCitiesData] = useState<CityData[]>([]);
+    const [isCitiesLoaded, setIsCitiesLoaded] = useState(false);
+
+    // Fetch cities from Supabase
+    useEffect(() => {
+        async function fetchCities() {
+            setGameState('waiting'); // Show some kind of loading or prevent actions
+            const { data, error } = await supabase.from('cities').select('*');
+            if (error) {
+                console.error('Error fetching cities:', error);
+            } else if (data) {
+                // Formatting data back to CityData structure
+                const formattedCities: CityData[] = data.map((row: any) => ({
+                    name: row.name,
+                    zip: row.zip || '',
+                    population: row.population || 0,
+                    coords: { lat: row.lat, lng: row.lng },
+                    category: row.category || []
+                }));
+                setCitiesData(formattedCities);
+                setIsCitiesLoaded(true);
+                // Restart a game to set the target city now that data is loaded
+                // Actually restartGame depends on this, so we handle it below
+            }
+        }
+        fetchCities();
+    }, []);
 
     // Load progress on mount
     useEffect(() => {
@@ -210,7 +239,9 @@ export function useGame() {
             setTimeLeft(120);
         }
 
-        let pool = (citiesData as CityData[]);
+        if (citiesData.length === 0) return; // Prevent crash if cities aren't loaded
+
+        let pool = [...citiesData];
 
         if (mode === 'story' && levelId) {
             setCurrentLevelId(levelId);
@@ -237,24 +268,25 @@ export function useGame() {
 
         const newTarget = getRandomCity(pool);
         setTargetCity(newTarget);
-    }, [selectedDepartment]);
+    }, [selectedDepartment, citiesData]);
 
     const nextCityTimeAttack = useCallback(() => {
+        if (citiesData.length === 0) return;
         setGuesses([]);
         setAttempts(0);
         setCurrentZoom(ZOOM_LEVELS[6]);
 
         // Pick new city
-        const pool = (citiesData as CityData[]).filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
+        const pool = citiesData.filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
         const newTarget = getRandomCity(pool);
         setTargetCity(newTarget);
-    }, []);
+    }, [citiesData]);
 
     const submitGuess = useCallback((cityName: string) => {
-        if ((gameState !== 'playing' && gameMode !== 'time_attack') || !targetCity) return;
+        if ((gameState !== 'playing' && gameMode !== 'time_attack') || !targetCity || citiesData.length === 0) return;
         if (gameState === 'ended') return;
 
-        const city = (citiesData as CityData[]).find(c => c.name.toLowerCase() === cityName.toLowerCase());
+        const city = citiesData.find(c => c.name.toLowerCase() === cityName.toLowerCase());
 
         if (city) {
             // Check for duplicate guess
@@ -379,6 +411,8 @@ export function useGame() {
         totalRounds,
         createRoom,
         joinRoom,
-        startGame
+        startGame,
+        citiesData,
+        isCitiesLoaded
     };
 }

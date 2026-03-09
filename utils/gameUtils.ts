@@ -1,12 +1,15 @@
-import { getDistance } from 'geolib';
-import citiesData from '@/data/cities.json';
-export type CityData = typeof citiesData[0];
+export interface CityData {
+    name: string;
+    zip: string;
+    population: number;
+    coords: Coordinates;
+    category: string[];
+}
 
 export interface Coordinates {
     lat: number;
     lng: number;
 }
-
 
 export const calculateDistance = (from: Coordinates, to: Coordinates): number => {
     return getDistance(

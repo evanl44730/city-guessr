@@ -2,6 +2,14 @@ const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 const { Server } = require('socket.io');
+const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env.local') });
+
+// Supabase Setup
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -33,15 +41,43 @@ function generateRoomCode() {
     return result;
 }
 
-// Load Cities Data (Server-side)
-const citiesData = require('./data/cities.json');
+// Server-side Cities State
+let citiesData = [];
+
+// Fetch initial data
+async function loadCities() {
+    try {
+        const { data, error } = await supabase.from('cities').select('*');
+        if (error) throw error;
+        if (data) {
+            citiesData = data;
+            console.log(`[Server] Loaded ${citiesData.length} cities from Supabase.`);
+        }
+    } catch (err) {
+        console.error('[Server] Failed to load cities from Supabase:', err.message);
+    }
+}
+
+// Ensure cities are loaded when the server starts
+loadCities();
 
 function getRandomCities(count) {
+    if (citiesData.length === 0) return [];
+    
+    // Convert DB structure mapping slightly if needed, assuming the table structure has category as text[]
     const frenchCities = citiesData.filter(city =>
-        city.category.includes('france_metropole') || city.category.includes('france_dom')
+        city.category && (city.category.includes('france_metropole') || city.category.includes('france_dom'))
     );
     const shuffled = [...frenchCities].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+    
+    // Map back to CityData format expected by client
+    return shuffled.slice(0, count).map(row => ({
+        name: row.name,
+        zip: row.zip || '',
+        population: row.population || 0,
+        coords: { lat: row.lat, lng: row.lng },
+        category: row.category || []
+    }));
 }
 
 app.prepare().then(() => {

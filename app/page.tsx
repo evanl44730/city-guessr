@@ -51,7 +51,9 @@ export default function Home() {
     totalRounds,
     createRoom,
     joinRoom,
-    startGame
+    startGame,
+    citiesData,
+    isCitiesLoaded
   } = useGame();
 
   const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department') => {
@@ -127,6 +129,13 @@ export default function Home() {
       {/* Background Gradient */}
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 pointer-events-none" />
 
+      {/* Loading Overlay */}
+      {!isCitiesLoaded && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+
       {inMenu && !showStoryMenu && !showMultiplayerMenu && <MainMenu onSelectMode={handleStartGame} />}
 
       {showStoryMenu && (
@@ -154,6 +163,7 @@ export default function Home() {
 
           <div className="w-full max-w-md z-50 pointer-events-auto px-4 md:px-0">
             <SearchInput
+              citiesData={citiesData}
               onSelect={submitGuess}
               disabled={gameState !== 'playing'}
             />
