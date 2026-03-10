@@ -14,6 +14,7 @@ import { useGame } from '@/hooks/useGame';
 import { generateStoryLevelsForDepartment, generateStoryLevelsForCountry } from '@/data/storyLevels';
 import EuropeMenu from '@/components/EuropeMenu';
 import DailyMenu from '@/components/DailyMenu';
+import HigherLowerGame from '@/components/HigherLowerGame';
 
 // Dynamically import MapWrapper to avoid SSR issues with Leaflet
 const MapWrapper = dynamic(() => import('@/components/MapWrapper'), {
@@ -28,6 +29,8 @@ export default function Home() {
   const [showDepartmentMenu, setShowDepartmentMenu] = useState(false);
   const [showEuropeMenu, setShowEuropeMenu] = useState(false);
   const [showDailyMenu, setShowDailyMenu] = useState(false);
+  const [showHigherLower, setShowHigherLower] = useState(false);
+  const [higherLowerType, setHigherLowerType] = useState<'population' | 'latitude'>('population');
 
   const [storyCategory, setStoryCategory] = useState<string>('france');
 
@@ -98,7 +101,7 @@ export default function Home() {
     return citiesData;
   }, [gameMode, citiesData, selectedDepartment, selectedCountry, storyCategory]);
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
@@ -110,6 +113,14 @@ export default function Home() {
       setShowEuropeMenu(true);
     } else if (mode === 'daily') {
       setShowDailyMenu(true);
+    } else if (mode === 'higher_lower') {
+      setHigherLowerType('population');
+      setShowHigherLower(true);
+      setInMenu(false);
+    } else if (mode === 'north_south') {
+      setHigherLowerType('latitude');
+      setShowHigherLower(true);
+      setInMenu(false);
     } else {
       restartGame(mode);
       setInMenu(false);
@@ -164,6 +175,7 @@ export default function Home() {
     setShowDepartmentMenu(false);
     setShowEuropeMenu(false);
     setShowDailyMenu(false);
+    setShowHigherLower(false);
     setInMenu(true);
     restartGame('france'); // Reset to default mode to clear online state if needed
   };
@@ -235,7 +247,12 @@ export default function Home() {
         </div>
       )}
 
-      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && <MainMenu onSelectMode={handleStartGame} />}
+      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && !showHigherLower && <MainMenu onSelectMode={handleStartGame} />}
+
+      {/* HIGHER LOWER MODE */}
+      {showHigherLower && (
+        <HigherLowerGame gameType={higherLowerType} citiesData={citiesData} onBack={handleBackToMenu} />
+      )}
 
       {showStoryMenu && (
         <StoryMenu

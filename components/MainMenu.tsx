@@ -1,8 +1,8 @@
-import { Map, Globe, Trophy, Users, LayoutGrid, Calendar } from 'lucide-react';
+import { Map, Globe, Trophy, Users, LayoutGrid, Calendar, TrendingUp, Compass } from 'lucide-react';
 import Image from 'next/image';
 
 interface MainMenuProps {
-    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily') => void;
+    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south') => void;
 }
 
 export default function MainMenu({ onSelectMode }: MainMenuProps) {
@@ -141,6 +141,34 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-yellow-300 transition-colors">Défi Quotidien</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
                             Une ville par jour. <br /> Pourrez-vous la trouver ?
+                        </p>
+                    </button>
+
+                    <button
+                        onClick={() => onSelectMode('higher_lower')}
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-cyan-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300"
+                    >
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-cyan-500/20 text-cyan-400 mb-4 md:mb-6 group-hover:bg-cyan-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-cyan-500/10">
+                            <TrendingUp className="w-8 h-8 md:w-12 md:h-12" />
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-cyan-300 transition-colors">Plus ou Moins</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                            Comparez les populations !
+                        </p>
+                    </button>
+
+                    <button
+                        onClick={() => onSelectMode('north_south')}
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-indigo-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300"
+                    >
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-indigo-500/20 text-indigo-400 mb-4 md:mb-6 group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-indigo-500/10">
+                            <Compass className="w-8 h-8 md:w-12 md:h-12" />
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-indigo-300 transition-colors">Nord ou Sud</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                            Lequel est plus au Nord ?
                         </p>
                     </button>
                 </div>
