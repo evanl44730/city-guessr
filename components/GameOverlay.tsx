@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GameState, Guess } from '@/hooks/useGame';
-import { RotateCcw, History, Home, Flag, Globe, Trophy } from 'lucide-react';
-import { CityData } from '@/utils/gameUtils';
+import { RotateCcw, History, Home, Flag, Globe, Trophy, Share2, AlertCircle } from 'lucide-react';
+import { CityData, getDifficultyFromPopulation, generateHintString } from '@/utils/gameUtils';
 
 interface GameOverlayProps {
     attempts: number;
@@ -10,14 +10,15 @@ interface GameOverlayProps {
     targetCity: CityData | null;
     onRestart: () => void;
     onMenu: () => void;
-    gameMode: 'france' | 'capital' | 'story' | 'time_attack' | 'department' | 'europe';
+    onNextLevel?: () => void;
+    gameMode: 'france' | 'capital' | 'story' | 'time_attack' | 'department' | 'europe' | 'daily';
     score?: number;
     timeLeft?: number;
     leaderboard?: Array<{ username: string, score: number }>;
     onSubmitScore?: (username: string) => void;
 }
 
-export default function GameOverlay({ attempts, guesses, gameState, targetCity, onRestart, onMenu, gameMode, score = 0, timeLeft = 0, leaderboard = [], onSubmitScore }: GameOverlayProps) {
+export default function GameOverlay({ attempts, guesses, gameState, targetCity, onRestart, onMenu, onNextLevel, gameMode, score = 0, timeLeft = 0, leaderboard = [], onSubmitScore }: GameOverlayProps) {
     const isGameOver = gameState !== 'playing';
     const [showHistory, setShowHistory] = useState(false);
     const [username, setUsername] = useState('');
@@ -29,6 +30,43 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
         const s = seconds % 60;
         return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
+
+    // Daily Mode Share Logic
+    const handleShareDaily = () => {
+        if (!targetCity) return;
+        
+        let emojiGrid = '';
+        const maxAttempts = 6;
+        
+        // Generate grid
+        for (let i = 0; i < maxAttempts; i++) {
+            if (i < guesses.length) {
+                const dist = guesses[i].distance;
+                if (dist === 0) emojiGrid += '🟩'; // Perfect
+                else if (dist < 50) emojiGrid += '🟨'; // Very Close
+                else if (dist < 200) emojiGrid += '🟧'; // Close
+                else emojiGrid += '🟥'; // Far
+            } else if (i === guesses.length && gameState === 'won') {
+                 // The winning guess isn't fully in `guesses` array until next render sometimes, 
+                 // but typically in this setup `attempts` holds the winning attempt count.
+                 // Actually `guesses` DOES contain the winning guess.
+            } else {
+                emojiGrid += '⬛'; // Unused
+            }
+        }
+
+        const winCount = gameState === 'won' ? attempts : 'X';
+        const todayStr = new Date().toLocaleDateString('fr-FR');
+        const shareText = `CityGuessr - Défi Quotidien (${todayStr})\n${winCount}/6\n\n${emojiGrid}\n\nhttps://cityguessr.fr`;
+        
+        navigator.clipboard.writeText(shareText);
+        setHasSubmitted(true); // Reuse this state to show "Copied" feedback
+        setTimeout(() => setHasSubmitted(false), 2000);
+    };
+
+    const difficulty = targetCity ? getDifficultyFromPopulation(targetCity.population) : null;
+    const difficultyColor = difficulty === 'Facile' ? 'text-green-400' : difficulty === 'Moyen' ? 'text-yellow-400' : difficulty === 'Difficile' ? 'text-orange-400' : 'text-red-400';
+    const showHint = attempts === 5 && gameState === 'playing' && targetCity;
 
     return (
         <>
@@ -60,10 +98,16 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                             )}
 
                             <div className="flex items-center gap-2">
-                                {gameMode === 'france' ? <Flag className="h-3.5 w-3.5 text-blue-400" /> : gameMode === 'capital' || gameMode === 'europe' ? <Globe className="h-3.5 w-3.5 text-emerald-400" /> : gameMode === 'department' ? <Flag className="h-3.5 w-3.5 text-purple-400" /> : <Trophy className="h-3.5 w-3.5 text-amber-400" />}
+                                {gameMode === 'france' ? <Flag className="h-3.5 w-3.5 text-blue-400" /> : gameMode === 'capital' || gameMode === 'europe' ? <Globe className="h-3.5 w-3.5 text-emerald-400" /> : gameMode === 'department' ? <Flag className="h-3.5 w-3.5 text-purple-400" /> : gameMode === 'daily' ? <Trophy className="h-3.5 w-3.5 text-yellow-400" /> : <Trophy className="h-3.5 w-3.5 text-amber-400" />}
                                 <span className="text-slate-200 font-bold text-[10px] md:text-xs uppercase tracking-wider hidden sm:inline">
-                                    {gameMode === 'france' ? 'France' : gameMode === 'capital' ? 'Monde' : gameMode === 'time_attack' ? 'Chrono' : gameMode === 'department' ? 'Département' : gameMode === 'europe' ? 'Europe' : 'Histoire'}
+                                    {gameMode === 'france' ? 'France' : gameMode === 'capital' ? 'Monde' : gameMode === 'time_attack' ? 'Chrono' : gameMode === 'department' ? 'Département' : gameMode === 'europe' ? 'Europe' : gameMode === 'daily' ? 'Quotidien' : 'Histoire'}
                                 </span>
+                                {/* Difficulty Badge for Daily */}
+                                {gameMode === 'daily' && difficulty && (
+                                    <span className={`ml-2 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-sm bg-black/20 border border-white/5 ${difficultyColor}`}>
+                                        {difficulty}
+                                    </span>
+                                )}
                             </div>
 
                             <div className="flex gap-1 md:gap-1.5">
@@ -78,6 +122,19 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                     </div>
                 </div>
             </div>
+
+            {/* 6th Attempt Hint - Top Center */}
+            {showHint && targetCity && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 animate-in slide-in-from-top-4 fade-in duration-500">
+                    <div className="flex items-center gap-3 bg-red-500/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-red-500/20 shadow-lg shadow-red-500/10">
+                        <AlertCircle className="w-5 h-5 text-red-400 animate-pulse" />
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest leading-none mb-1">Dernière chance</span>
+                            <span className="text-xl font-mono font-bold text-white tracking-[0.2em]">{generateHintString(targetCity.name)}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* History Box - Top Right */}
             {guesses.length > 0 && (
@@ -233,13 +290,44 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                         )}
 
                         <div className="space-y-3">
-                            {gameMode === 'story' && gameState === 'won' ? (
+                            {gameMode === 'daily' && isGameOver && (
+                                <button
+                                    onClick={handleShareDaily}
+                                    className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold text-lg transition-all shadow-lg
+                                        ${hasSubmitted 
+                                            ? 'bg-green-500 text-white' 
+                                            : 'bg-yellow-500 hover:bg-yellow-400 text-yellow-950 shadow-yellow-500/20'}`}
+                                >
+                                    {hasSubmitted ? '✓ Résultat copié !' : <><Share2 className="h-5 w-5" /> Partager mon score</>}
+                                </button>
+                            )}
+                            {gameMode === 'story' ? (
+                                <>
+                                    <button
+                                        onClick={onNextLevel || onMenu}
+                                        className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold text-lg transition-all shadow-lg text-white
+                                            ${gameState === 'won' 
+                                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:brightness-110 hover:scale-[1.02] shadow-green-500/20' 
+                                                : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:brightness-110 hover:scale-[1.02] shadow-blue-500/20'}`}
+                                    >
+                                        <Trophy className="h-5 w-5" />
+                                        Niveau Suivant
+                                    </button>
+                                    <button
+                                        onClick={onMenu}
+                                        className="w-full flex items-center justify-center gap-2 bg-slate-800 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-slate-700 hover:scale-[1.02] active:scale-[0.98] transition-all border border-white/5"
+                                    >
+                                        <Home className="h-5 w-5" />
+                                        Retour au Menu
+                                    </button>
+                                </>
+                            ) : gameMode === 'daily' ? (
                                 <button
                                     onClick={onMenu}
-                                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-green-500/20"
+                                    className="w-full flex items-center justify-center gap-2 bg-slate-800 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:bg-slate-700 hover:scale-[1.02] active:scale-[0.98] transition-all border border-white/5"
                                 >
-                                    <Trophy className="h-5 w-5" />
-                                    Continuer (Menu)
+                                    <Home className="h-5 w-5" />
+                                    Retour au Menu
                                 </button>
                             ) : (
                                 <button

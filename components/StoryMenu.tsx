@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { STORY_LEVELS, StoryLevel } from "@/data/storyLevels";
-import { Lock, Star, Check, Map as MapIcon, Globe, LayoutGrid, ChevronDown } from "lucide-react";
+import { Lock, Star, Check, X, Map as MapIcon, Globe, LayoutGrid, ChevronDown } from "lucide-react";
 import { DEPARTMENTS } from "@/data/departments";
 import { EUROPEAN_COUNTRIES } from "@/data/europe";
-import { CityData } from "@/utils/gameUtils";
+import { getDifficultyFromPopulation } from "@/utils/gameUtils";
 
 interface StoryMenuProps {
     onSelectLevel: (levelId: number) => void;
@@ -41,8 +41,14 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
     // We limit total by 3335 (Max theoretic). 
     // In practice, since cities might be missing, 3335 is the absolute 100% completion target.
     const totalLevels = expectedDeptCities + expectedEuropeCities + expectedClassicCities;
-    const completedCount = Object.keys(progress).length;
-    const progressPercentage = Math.min(100, Math.max(0, (completedCount / totalLevels) * 100));
+    
+    // Calculate wins (progress > 0) and failures (progress === -1)
+    const progressValues = Object.values(progress);
+    const winCount = progressValues.filter(p => p > 0).length;
+    const failCount = progressValues.filter(p => p === -1).length;
+    
+    const winPercentage = Math.min(100, Math.max(0, (winCount / totalLevels) * 100));
+    const failPercentage = Math.min(100, Math.max(0, (failCount / totalLevels) * 100));
 
     return (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-2 md:p-4 animate-in fade-in duration-300">
@@ -75,21 +81,35 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
                             <div>
                                 <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-widest pl-1">Progression Globale</h3>
                             </div>
-                            <div className="text-right">
-                                <span className="text-2xl font-black text-white">{completedCount}</span>
-                                <span className="text-slate-500 font-medium ml-1">/ {totalLevels}</span>
+                            <div className="text-right flex items-center gap-3">
+                                <div className="flex items-center gap-1 text-green-400">
+                                    <Check className="w-4 h-4" />
+                                    <span className="text-xl font-black">{winCount}</span>
+                                </div>
+                                <div className="flex items-center gap-1 text-red-400">
+                                    <X className="w-4 h-4" />
+                                    <span className="text-xl font-black">{failCount}</span>
+                                </div>
+                                <span className="text-slate-500 font-medium ml-2">/ {totalLevels}</span>
                             </div>
                         </div>
-                        <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5 relative z-10">
+                        <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5 relative z-10 flex">
+                            {/* Win Bar */}
                             <div 
-                                className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full transition-all duration-1000 ease-out relative"
-                                style={{ width: `${progressPercentage}%` }}
+                                className="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-1000 ease-out relative"
+                                style={{ width: `${winPercentage}%` }}
                             >
-                                <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                            </div>
+                            {/* Fail Bar */}
+                            <div 
+                                className="h-full bg-gradient-to-r from-red-500 to-orange-400 transition-all duration-1000 ease-out relative"
+                                style={{ width: `${failPercentage}%` }}
+                            >
                             </div>
                         </div>
-                        <div className="mt-2 text-right text-xs text-amber-400/80 font-medium relative z-10">
-                            {progressPercentage.toFixed(1)}% complété
+                        <div className="mt-2 flex justify-between text-xs font-medium relative z-10">
+                            <div className="text-green-400/80">{winPercentage.toFixed(1)}% réussis</div>
+                            <div className="text-red-400/80">{failPercentage.toFixed(1)}% échoués</div>
                         </div>
                     </div>
 
@@ -164,47 +184,73 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
                         // First level of the currently selected category is always unlocked.
                         const isFirstLevel = index === 0;
                         
-                        // A level is unlocked if it's the first level OR if the PREVIOUS level in THIS category is completed.
+                        // A level is unlocked if it's the first level OR if the PREVIOUS level in THIS category is completed in any way (won or failed).
                         // We check the previous level's ID in the filtered array instead of just `level.id - 1`
                         // to handle dynamic gaps (like dept_31 having IDs 31001, 31002, etc.)
                         const previousLevelInCat = index > 0 ? filteredLevels[index - 1] : null;
                         const isUnlocked = isFirstLevel || (previousLevelInCat && progress[previousLevelInCat.id] !== undefined);
 
-                        const isCompleted = progress[level.id] !== undefined;
+                        const hasPlayed = progress[level.id] !== undefined;
+                        const isCompleted = hasPlayed && progress[level.id] > 0;
+                        const isFailed = hasPlayed && progress[level.id] === -1;
                         const bestScore = progress[level.id];
+
+                        // Prevent playing if already played
+                        const canPlay = isUnlocked && !hasPlayed;
+
+                        // Calculate Difficulty Tag
+                        let diffTag: string = level.difficulty;
+                        if (!diffTag && level.population) {
+                            diffTag = getDifficultyFromPopulation(level.population);
+                        }
+                        const isHardOrExpert = diffTag === 'Difficile' || diffTag === 'Hard' || diffTag === 'Expert' || diffTag === 'Very Hard';
 
                         return (
                             <button
                                 key={level.id}
-                                onClick={() => isUnlocked && onSelectLevel(level.id)}
-                                disabled={!isUnlocked}
+                                onClick={() => canPlay && onSelectLevel(level.id)}
+                                disabled={!canPlay}
                                 className={`
                                     relative flex flex-col items-center justify-center p-2 md:p-4 rounded-xl md:rounded-2xl border transition-all duration-300 group
                                     ${isCompleted
-                                        ? 'border-green-500/30 bg-green-500/10 hover:bg-green-500/20 hover:-translate-y-1'
+                                        ? 'border-green-500/30 bg-green-500/10 hover:bg-green-500/20 cursor-default grayscale-0 opacity-100'
+                                    : isFailed
+                                        ? 'border-red-500/30 bg-red-500/10 hover:bg-red-500/20 cursor-default grayscale-0 opacity-100'
                                         : isUnlocked
                                             ? 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/50 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10'
                                             : 'border-transparent bg-black/20 opacity-40 cursor-not-allowed grayscale'}
                                 `}
                             >
-                                <span className={`text-lg md:text-xl font-black mb-0.5 md:mb-1 ${isCompleted ? 'text-green-400' : isUnlocked ? 'text-white group-hover:text-blue-400' : 'text-slate-500'}`}>
+                                <span className={`text-lg md:text-xl font-black mb-0.5 md:mb-1 ${isCompleted ? 'text-green-400' : isFailed ? 'text-red-400' : isUnlocked ? 'text-white group-hover:text-blue-400' : 'text-slate-500'}`}>
                                     {level.id}
                                 </span>
 
-                                {isUnlocked ? (
+                                {(isUnlocked || hasPlayed) ? (
                                     <div className="flex flex-col items-center w-full">
                                         <div className="w-full h-px bg-white/5 my-1 md:my-2" />
                                         <span className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate max-w-full">
-                                            {isCompleted ? level.cityName : '???'}
+                                            {hasPlayed ? level.cityName : '???'}
                                         </span>
                                         {isCompleted ? (
                                             <div className="mt-1 md:mt-2 flex items-center gap-1 text-[10px] md:text-xs font-bold text-green-400 bg-green-400/10 px-1.5 md:px-2 py-0.5 rounded-full">
                                                 <Check className="h-2.5 w-2.5 md:h-3 md:w-3" />
                                                 {bestScore}
                                             </div>
+                                        ) : isFailed ? (
+                                            <div className="mt-1 md:mt-2 flex items-center gap-1 text-[10px] md:text-xs font-bold text-red-500 bg-red-500/10 px-1.5 md:px-2 py-0.5 rounded-full">
+                                                <X className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                                Échec
+                                            </div>
                                         ) : (
-                                            <div className="mt-1 md:mt-2 text-[9px] md:text-[10px] text-slate-500 bg-white/5 px-1.5 md:px-2 py-0.5 rounded-full">
-                                                À faire
+                                            <div className="mt-1 md:mt-2 flex flex-col items-center gap-1">
+                                                {diffTag && (
+                                                    <span className={`text-[8px] font-bold uppercase px-1 rounded bg-black/30 ${isHardOrExpert ? 'text-orange-400' : 'text-slate-400'}`}>
+                                                        {diffTag}
+                                                    </span>
+                                                )}
+                                                <div className="text-[9px] md:text-[10px] text-slate-500 bg-white/5 px-1.5 md:px-2 py-0.5 rounded-full">
+                                                    Jouer
+                                                </div>
                                             </div>
                                         )}
                                     </div>
@@ -214,7 +260,7 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
                                     </div>
                                 )}
 
-                                {level.difficulty === 'Hard' || level.difficulty === 'Very Hard' || level.difficulty === 'Expert' ? (
+                                {isHardOrExpert ? (
                                     <div className="absolute top-1 right-1 md:top-2 md:right-2">
                                         <Star className="h-2 w-2 md:h-2.5 md:w-2.5 text-amber-400 fill-amber-400" />
                                     </div>

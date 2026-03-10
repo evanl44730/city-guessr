@@ -303,6 +303,23 @@ app.prepare().then(() => {
             socket.emit('leaderboard_update', timeAttackLeaderboard);
         });
 
+        socket.on('leave_room', ({ roomId }) => {
+            socket.leave(roomId);
+            const room = rooms.get(roomId);
+            if (room && room.players.has(socket.id)) {
+                room.players.delete(socket.id);
+                if (room.players.size === 0) {
+                    rooms.delete(roomId);
+                } else {
+                    if (room.hostId === socket.id) {
+                        room.hostId = room.players.keys().next().value;
+                        io.to(roomId).emit('host_changed', { newHostId: room.hostId });
+                    }
+                    io.to(roomId).emit('update_players', Array.from(room.players.values()));
+                }
+            }
+        });
+
         socket.on('disconnect', () => {
             console.log('Client disconnected:', socket.id);
             rooms.forEach((room, roomId) => {
@@ -311,6 +328,10 @@ app.prepare().then(() => {
                     if (room.players.size === 0) {
                         rooms.delete(roomId);
                     } else {
+                        if (room.hostId === socket.id) {
+                            room.hostId = room.players.keys().next().value;
+                            io.to(roomId).emit('host_changed', { newHostId: room.hostId });
+                        }
                         io.to(roomId).emit('update_players', Array.from(room.players.values()));
                     }
                 }

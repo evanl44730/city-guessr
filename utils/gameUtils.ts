@@ -45,3 +45,51 @@ export const calculateDirection = (from: Coordinates, to: Coordinates): string =
 export const getRandomCity = (cities: CityData[]): CityData => {
     return cities[Math.floor(Math.random() * cities.length)];
 };
+
+// Seeded random number generator (simple version for daily)
+const mulberry32 = (a: number) => {
+    return function() {
+      var t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    }
+}
+
+// Get city based on date string (YYYY-MM-DD)
+export const getDailyCity = (cities: CityData[], dateStr: string): CityData => {
+    // Basic hash of the date string to use as seed
+    let hash = 0;
+    for (let i = 0; i < dateStr.length; i++) {
+        const char = dateStr.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    // Use seeded RNG
+    const randomFunc = mulberry32(hash);
+    
+    // Sort cities to guarantee same order before picking
+    const sortedCities = [...cities].sort((a, b) => a.name.localeCompare(b.name));
+    
+    const index = Math.floor(randomFunc() * sortedCities.length);
+    return sortedCities[index];
+};
+
+export const getDifficultyFromPopulation = (population: number): 'Facile' | 'Moyen' | 'Difficile' | 'Expert' => {
+    if (population > 100000) return 'Facile';
+    if (population > 20000) return 'Moyen';
+    if (population > 5000) return 'Difficile';
+    return 'Expert';
+};
+
+// Generate hint string (e.g. "T-------" or "S---- E------")
+export const generateHintString = (cityName: string): string => {
+    return cityName.split(' ').map(word => {
+        if (word.length <= 1) return word;
+        // Keep first letter, replace rest with dashes (handling hyphens if any)
+        const firstLetter = word[0];
+        const rest = word.slice(1).replace(/[a-zA-Zà-üÀ-Ü]/g, '-');
+        return firstLetter + rest;
+    }).join(' ');
+};

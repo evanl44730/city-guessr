@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from 'react';
-import { CityData, calculateDistance, calculateDirection, getRandomCity } from '@/utils/gameUtils';
+import { CityData, calculateDistance, calculateDirection, getRandomCity, getDailyCity, getDifficultyFromPopulation, generateHintString } from '@/utils/gameUtils';
 import { STORY_LEVELS, StoryLevel, generateStoryLevelsForDepartment } from '@/data/storyLevels';
 import { socket } from '@/lib/socket';
 import { supabase } from '@/lib/supabaseClient';
@@ -33,12 +33,16 @@ export function useGame() {
     const [gameState, setGameState] = useState<GameState>('playing');
     const [currentZoom, setCurrentZoom] = useState(16);
 
-    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe'>('france');
+    const [gameMode, setGameMode] = useState<'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily'>('france');
     const [selectedDepartment, setSelectedDepartment] = useState<string>('31'); // Default to Haute-Garonne
     const [selectedCountry, setSelectedCountry] = useState<string>('FR'); // Default to France
     const [currentLevelId, setCurrentLevelId] = useState<number>(1);
     const [storyProgress, setStoryProgress] = useState<Record<number, number>>({}); // Level ID -> Best Score (attempts)
     const [dynamicStoryLevels, setDynamicStoryLevels] = useState<StoryLevel[]>([]); // Levels for currently selected department
+
+    // Daily Challenge State
+    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [dailyProgress, setDailyProgress] = useState<Record<string, { attempts: number, win: boolean, city: string }>>({});
 
     // Time Attack State
     const [score, setScore] = useState(0);
@@ -112,12 +116,21 @@ export function useGame() {
 
     // Load progress on mount
     useEffect(() => {
-        const saved = localStorage.getItem('city_guessr_story_progress');
-        if (saved) {
+        const savedStory = localStorage.getItem('city_guessr_story_progress');
+        if (savedStory) {
             try {
-                setStoryProgress(JSON.parse(saved));
+                setStoryProgress(JSON.parse(savedStory));
             } catch (e) {
-                console.error("Failed to load save", e);
+                console.error("Failed to load story save", e);
+            }
+        }
+
+        const savedDaily = localStorage.getItem('city_guessr_daily_progress');
+        if (savedDaily) {
+            try {
+                setDailyProgress(JSON.parse(savedDaily));
+            } catch (e) {
+                console.error("Failed to load daily save", e);
             }
         }
     }, []);
@@ -210,6 +223,9 @@ export function useGame() {
         socket.on('settings_updated', (settings: { categories: string[]; rounds: number }) => {
             setGameSettings(settings);
         });
+        socket.on('host_changed', ({ newHostId }: { newHostId: string }) => {
+            if (socket.id === newHostId) setIsHost(true);
+        });
         socket.on('error', onError);
 
         // Request initial leaderboard
@@ -231,14 +247,25 @@ export function useGame() {
             socket.off('game_over', onGameOver);
             socket.off('leaderboard_update', onLeaderboardUpdate);
             socket.off('settings_updated');
+            socket.off('host_changed');
             socket.off('error', onError);
         };
     }, []);
 
-    const saveProgress = (levelId: number, attemptsCount: number) => {
+    const saveStoryProgress = (levelId: number, attemptsCount: number) => {
         setStoryProgress(prev => {
             const currentBest = prev[levelId];
-            if (!currentBest || attemptsCount < currentBest) {
+            // Update if:
+            // 1. First time playing this level (!currentBest && currentBest !== -1 && currentBest !== 0)
+            // 2. Played and failed previously, but now passing (currentBest === -1 && attemptsCount > 0)
+            // 3. Played and passing, but improved score (currentBest > 0 && attemptsCount > 0 && attemptsCount < currentBest)
+            // Note: If they passing, and attemptsCount is -1, we DONT overwrite.
+            const isFirstTime = currentBest === undefined;
+            const isPassingNow = attemptsCount > 0;
+            const wasFailing = currentBest === -1;
+            const isImprovement = currentBest > 0 && isPassingNow && attemptsCount < currentBest;
+
+            if (isFirstTime || (wasFailing && isPassingNow) || isImprovement) {
                 const newProgress = { ...prev, [levelId]: attemptsCount };
                 localStorage.setItem('city_guessr_story_progress', JSON.stringify(newProgress));
                 return newProgress;
@@ -247,10 +274,19 @@ export function useGame() {
         });
     };
 
-    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' = 'france', levelId?: number, departmentId?: string, countryId?: string) => {
+    const saveDailyProgress = (dateStr: string, attemptsCount: number, isWin: boolean, cityName: string) => {
+        setDailyProgress(prev => {
+            const newProgress = { ...prev, [dateStr]: { attempts: attemptsCount, win: isWin, city: cityName } };
+            localStorage.setItem('city_guessr_daily_progress', JSON.stringify(newProgress));
+            return newProgress;
+        });
+    };
+
+    const restartGame = useCallback((mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' = 'france', levelId?: number, departmentId?: string, countryId?: string, dateStr?: string) => {
         setGameMode(mode);
         if (departmentId) setSelectedDepartment(departmentId);
         if (countryId) setSelectedCountry(countryId);
+        if (dateStr) setSelectedDate(dateStr);
 
         if (mode === 'online') {
             socket.connect();
@@ -304,8 +340,8 @@ export function useGame() {
             }
         }
 
-        if (mode === 'france' || mode === 'time_attack') {
-            // Force only French cities for Time Attack
+        if (mode === 'france' || mode === 'time_attack' || mode === 'daily') {
+            // Force only French cities for Time Attack and Daily Challenge
             pool = pool.filter(c => c.category.includes('france_metropole') || c.category.includes('france_dom'));
         } else if (mode === 'capital') {
             pool = pool.filter(c => c.category.includes('world_capital'));
@@ -317,9 +353,14 @@ export function useGame() {
             pool = pool.filter(c => c.category && c.category.includes(`country_${country}`));
         }
 
-        const newTarget = getRandomCity(pool);
-        setTargetCity(newTarget);
-    }, [selectedDepartment, selectedCountry, citiesData, dynamicStoryLevels]);
+        if (mode === 'daily') {
+            const newTarget = getDailyCity(pool, dateStr || selectedDate);
+            setTargetCity(newTarget);
+        } else {
+            const newTarget = getRandomCity(pool);
+            setTargetCity(newTarget);
+        }
+    }, [selectedDepartment, selectedCountry, selectedDate, citiesData, dynamicStoryLevels]);
 
     const nextCityTimeAttack = useCallback(() => {
         if (citiesData.length === 0) return;
@@ -370,7 +411,7 @@ export function useGame() {
                 } else {
                     setGameState(gameMode === 'online' ? 'waiting' : 'won');
                     if (gameMode === 'story') {
-                        saveProgress(currentLevelId, newAttempts);
+                        saveStoryProgress(currentLevelId, newAttempts);
                         // Store it just by level ID (progress tracking handles unlock)
                         // If we need the storyLevel to confirm it exists:
                         const storyLevel = STORY_LEVELS.find(l => l.id === currentLevelId) || dynamicStoryLevels.find(l => l.id === currentLevelId);
@@ -381,6 +422,8 @@ export function useGame() {
                                 return newProgress;
                             });
                         }
+                    } else if (gameMode === 'daily') {
+                        saveDailyProgress(selectedDate, newAttempts, true, targetCity.name);
                     }
                     if (gameMode === 'online') {
                         socket.emit('submit_round', { roomId, attempts: newAttempts });
@@ -405,6 +448,12 @@ export function useGame() {
                     }
                     if (gameMode === 'online') {
                         socket.emit('submit_round', { roomId, attempts: 6 }); // Max penalty
+                    }
+                    if (gameMode === 'daily') {
+                        saveDailyProgress(selectedDate, 6, false, targetCity.name);
+                    }
+                    if (gameMode === 'story') {
+                        saveStoryProgress(currentLevelId, -1);
                     }
                 }
             } else {
@@ -433,6 +482,16 @@ export function useGame() {
             socket.emit('start_game', { roomId });
         }
     };
+
+    const leaveRoom = useCallback(() => {
+        if (roomId) {
+            socket.emit('leave_room', { roomId });
+            setRoomId('');
+            setPlayers([]);
+            setIsHost(false);
+            setOnlinePhase('menu');
+        }
+    }, [roomId]);
 
     const updateGameSettings = (newSettings: { categories: string[]; rounds: number }) => {
         if (isHost && roomId) {
@@ -463,6 +522,9 @@ export function useGame() {
         submitGuess,
         restartGame,
         submitTimeAttackScore,
+        selectedDate,
+        dailyProgress,
+        currentLevelId,
         // Online Exports
         onlinePhase,
         roomId,
@@ -472,6 +534,7 @@ export function useGame() {
         totalRounds,
         createRoom,
         joinRoom,
+        leaveRoom,
         startGame,
         gameSettings,
         updateGameSettings,

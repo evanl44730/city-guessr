@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Crown, Copy, Play, Settings, ChevronDown, Map, Globe, LayoutGrid } from 'lucide-react';
+import { Crown, Copy, Play, Settings, ChevronDown, Map, Globe, LayoutGrid, ArrowLeft } from 'lucide-react';
 import { DEPARTMENTS } from '@/data/departments';
 import { EUROPEAN_COUNTRIES } from '@/data/europe';
 
@@ -21,11 +21,12 @@ interface LobbyProps {
     settings: GameSettings;
     onStartGame: () => void;
     onUpdateSettings: (settings: GameSettings) => void;
+    onLeaveRoom: () => void;
 }
 
 type PresetMode = 'france' | 'capitals' | 'europe' | 'europe_country' | 'department' | 'all';
 
-export default function Lobby({ roomId, players, isHost, settings, onStartGame, onUpdateSettings }: LobbyProps) {
+export default function Lobby({ roomId, players, isHost, settings, onStartGame, onUpdateSettings, onLeaveRoom }: LobbyProps) {
     const [presetMode, setPresetMode] = useState<PresetMode>('france');
     const [selectedCountry, setSelectedCountry] = useState('ES');
     const [selectedDepartment, setSelectedDepartment] = useState('75');
@@ -104,7 +105,16 @@ export default function Lobby({ roomId, players, isHost, settings, onStartGame, 
 
     return (
         <div className="fixed inset-0 z-[50] flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-md overflow-y-auto p-4">
-            <div className="w-full max-w-2xl p-6 md:p-8 rounded-3xl bg-slate-800/50 border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-300">
+            {/* Back Button */}
+            <button
+                onClick={onLeaveRoom}
+                className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/80 border border-white/10 text-slate-300 hover:text-white hover:bg-slate-700/80 transition-all font-medium backdrop-blur-sm z-10"
+            >
+                <ArrowLeft className="w-4 h-4" />
+                Quitter
+            </button>
+
+            <div className="w-full max-w-2xl p-6 md:p-8 rounded-3xl bg-slate-800/50 border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-300 mt-12 md:mt-0">
                 {/* Room Code */}
                 <div className="text-center mb-6">
                     <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Code du salon</h2>

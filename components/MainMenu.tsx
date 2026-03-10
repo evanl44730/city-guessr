@@ -1,8 +1,8 @@
-import { Map, Globe, Trophy, Users, LayoutGrid } from 'lucide-react';
+import { Map, Globe, Trophy, Users, LayoutGrid, Calendar } from 'lucide-react';
 import Image from 'next/image';
 
 interface MainMenuProps {
-    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe') => void;
+    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily') => void;
 }
 
 export default function MainMenu({ onSelectMode }: MainMenuProps) {
@@ -42,7 +42,7 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-blue-300 transition-colors">France</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            Maîtrisez la géographie française. <br /> 50 grandes villes à localiser.
+                            Maîtrisez la géographie française.
                         </p>
                     </button>
 
@@ -56,7 +56,7 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-emerald-300 transition-colors">Monde</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            Voyagez à travers les continents. <br /> 30 capitales à découvrir.
+                            Voyagez à travers les continents.
                         </p>
                     </button>
 
@@ -70,7 +70,7 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-amber-300 transition-colors">Histoire</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            Relevez le défi ultime. <br /> 50 niveaux de difficulté croissante.
+                            Relevez le défi ultime.
                         </p>
                     </button>
 
@@ -84,13 +84,13 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-purple-300 transition-colors">En ligne</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            Affrontez vos amis. <br /> Devinez en temps réel.
+                            Affrontez vos amis
                         </p>
                     </button>
 
                     <button
                         onClick={() => onSelectMode('department')}
-                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-pink-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-pink-500/20 transition-all duration-300 md:col-span-1 lg:col-span-2"
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-pink-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-pink-500/20 transition-all duration-300"
                     >
                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <div className="p-4 md:p-6 rounded-2xl bg-pink-500/20 text-pink-400 mb-4 md:mb-6 group-hover:bg-pink-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-pink-500/10">
@@ -98,13 +98,13 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-pink-300 transition-colors">Départements</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            Focus local. <br /> Explorer un territoire spécifique.
+                            Focus local.
                         </p>
                     </button>
 
                     <button
                         onClick={() => onSelectMode('europe')}
-                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-teal-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-300 md:col-span-1 lg:col-span-2"
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-teal-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-300"
                     >
                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <div className="p-4 md:p-6 rounded-2xl bg-teal-500/20 text-teal-400 mb-4 md:mb-6 group-hover:bg-teal-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-teal-500/10">
@@ -112,13 +112,13 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-teal-300 transition-colors">Europe</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            Voyage continental. <br /> Trouvez les villes par pays.
+                            Trouvez les villes par pays.
                         </p>
                     </button>
 
                     <button
                         onClick={() => onSelectMode('time_attack')}
-                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-red-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 md:col-span-2 lg:col-span-4"
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-red-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300"
                     >
                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <div className="p-4 md:p-6 rounded-2xl bg-red-500/20 text-red-400 mb-4 md:mb-6 group-hover:bg-red-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-red-500/10">
@@ -126,7 +126,21 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-red-300 transition-colors">Contre-la-montre</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            La course contre le temps. <br /> Trouvez un maximum de villes en 2 minutes.
+                            Trouvez un max de villes en 2 min.
+                        </p>
+                    </button>
+
+                    <button
+                        onClick={() => onSelectMode('daily')}
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-yellow-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300"
+                    >
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-yellow-500/20 text-yellow-400 mb-4 md:mb-6 group-hover:bg-yellow-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-yellow-500/10">
+                            <Calendar className="w-8 h-8 md:w-12 md:h-12" />
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-yellow-300 transition-colors">Défi Quotidien</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                            Une ville par jour. <br /> Pourrez-vous la trouver ?
                         </p>
                     </button>
                 </div>

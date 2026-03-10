@@ -6,6 +6,7 @@ export interface StoryLevel {
     difficulty: 'Easy' | 'Medium' | 'Hard' | 'Very Hard' | 'Expert';
     minScoreToUnlock: number;
     category: string;
+    population?: number;
 }
 
 export const STORY_LEVELS: StoryLevel[] = [
@@ -143,7 +144,8 @@ export function generateStoryLevelsForDepartment(departmentId: string, cities: C
             cityName: city.name,
             difficulty,
             minScoreToUnlock: 6,
-            category: categoryName
+            category: categoryName,
+            population: city.population
         };
     });
 }
@@ -172,7 +174,8 @@ export function generateStoryLevelsForCountry(countryId: string, cities: CityDat
             cityName: city.name,
             difficulty,
             minScoreToUnlock: 6,
-            category: categoryName
+            category: categoryName,
+            population: city.population
         };
     });
 }

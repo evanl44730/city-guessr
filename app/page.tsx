@@ -13,6 +13,7 @@ import DepartmentMenu from '@/components/DepartmentMenu';
 import { useGame } from '@/hooks/useGame';
 import { generateStoryLevelsForDepartment, generateStoryLevelsForCountry } from '@/data/storyLevels';
 import EuropeMenu from '@/components/EuropeMenu';
+import DailyMenu from '@/components/DailyMenu';
 
 // Dynamically import MapWrapper to avoid SSR issues with Leaflet
 const MapWrapper = dynamic(() => import('@/components/MapWrapper'), {
@@ -26,6 +27,7 @@ export default function Home() {
   const [showMultiplayerMenu, setShowMultiplayerMenu] = useState(false);
   const [showDepartmentMenu, setShowDepartmentMenu] = useState(false);
   const [showEuropeMenu, setShowEuropeMenu] = useState(false);
+  const [showDailyMenu, setShowDailyMenu] = useState(false);
 
   const [storyCategory, setStoryCategory] = useState<string>('france');
 
@@ -56,13 +58,17 @@ export default function Home() {
     totalRounds,
     createRoom,
     joinRoom,
+    leaveRoom,
     startGame,
     citiesData,
     isCitiesLoaded,
     selectedDepartment,
     selectedCountry,
     gameSettings,
-    updateGameSettings
+    updateGameSettings,
+    selectedDate,
+    dailyProgress,
+    currentLevelId
   } = useGame();
 
   // Filter the search suggestions based on the current game mode
@@ -92,7 +98,7 @@ export default function Home() {
     return citiesData;
   }, [gameMode, citiesData, selectedDepartment, selectedCountry, storyCategory]);
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
@@ -102,6 +108,8 @@ export default function Home() {
       setShowDepartmentMenu(true);
     } else if (mode === 'europe') {
       setShowEuropeMenu(true);
+    } else if (mode === 'daily') {
+      setShowDailyMenu(true);
     } else {
       restartGame(mode);
       setInMenu(false);
@@ -155,6 +163,7 @@ export default function Home() {
     setShowMultiplayerMenu(false);
     setShowDepartmentMenu(false);
     setShowEuropeMenu(false);
+    setShowDailyMenu(false);
     setInMenu(true);
     restartGame('france'); // Reset to default mode to clear online state if needed
   };
@@ -166,6 +175,22 @@ export default function Home() {
   const center: [number, number] = targetCity
     ? [targetCity.coords.lat, targetCity.coords.lng]
     : [46.603354, 1.888334];
+
+  // Daily Menu
+  if (inMenu && showDailyMenu) {
+    return (
+      <DailyMenu
+        onBack={handleBackToMenu}
+        onPlayDate={(dateStr) => {
+          restartGame('daily', undefined, undefined, undefined, dateStr);
+          setShowDailyMenu(false);
+          setInMenu(false);
+        }}
+        dailyProgress={dailyProgress}
+        citiesData={citiesData}
+      />
+    );
+  }
 
   // Multiplayer Logic
   if (gameMode === 'online') {
@@ -188,6 +213,9 @@ export default function Home() {
           settings={gameSettings}
           onStartGame={startGame}
           onUpdateSettings={updateGameSettings}
+          onLeaveRoom={() => {
+            leaveRoom();
+          }}
         />
       );
     }
@@ -235,12 +263,12 @@ export default function Home() {
       )}
 
       {(!inMenu || (gameMode === 'online' && onlinePhase === 'game')) && (
-        <div className="z-50 max-w-5xl w-full flex flex-col items-center gap-4 md:gap-6 mb-2 md:mb-4 animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-none">
+        <div className={`max-w-5xl w-full flex flex-col items-center gap-4 md:gap-6 mb-2 md:mb-4 animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-none ${gameState === 'playing' ? 'z-50' : 'z-0'}`}>
           <h1 className="text-2xl md:text-5xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 tracking-tighter drop-shadow-2xl pointer-events-auto">
             CityGuessr
           </h1>
 
-          <div className="w-full max-w-md z-50 pointer-events-auto px-4 md:px-0">
+          <div className="w-full max-w-md pointer-events-auto px-4 md:px-0">
             <SearchInput
               citiesData={filteredSearchPool}
               onSelect={submitGuess}
@@ -279,7 +307,10 @@ export default function Home() {
                     setShowStoryMenu(true);
                   }
                 }}
-                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack' | 'department' | 'europe'}
+                onNextLevel={gameMode === 'story' && currentLevelId ? () => {
+                   restartGame('story', currentLevelId + 1);
+                } : undefined}
+                gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack' | 'department' | 'europe' | 'daily'}
                 score={score}
                 timeLeft={timeLeft}
                 leaderboard={leaderboard}
