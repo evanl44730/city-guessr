@@ -1,86 +1,100 @@
 # CityGuessr 🌍
 
-CityGuessr est une application web interactive de jeu géographique. Le but du jeu est de deviner l'emplacement d'une ville cible. À chaque essai, le jeu indique la distance et la direction par rapport à la ville recherchée, et effectue un dézoom automatique sur la carte pour vous aider. Le joueur dispose de 6 essais maximum par ville.
+CityGuessr est une application web interactive de jeux géographiques. Le concept central : deviner l'emplacement de villes grâce à des indices visuels et géographiques.
 
-## 🚀 Fonctionnalités Principales
+## 🚀 Modes de Jeu
 
-CityGuessr propose plusieurs modes de jeu pour s'adapter à toutes les envies :
+### 🗺️ Modes classiques (avec carte)
+- **France** — Devinez une ville aléatoire en France métropolitaine ou DOM-TOM. 6 essais, avec dézoom progressif.
+- **Capitales** — Testez vos connaissances sur les capitales mondiales.
+- **Département** — Ciblez un département spécifique : devinez des villes uniquement dans cette zone.
+- **Europe** — Choisissez un pays européen et devinez ses villes.
 
-- **🧠 Mode Solo**
-  - **France :** Devinez une ville aléatoire en France métropolitaine ou dans les DOM-TOM.
-  - **Capitales :** Testez vos connaissances sur les capitales mondiales.
-  - **Département :** Ciblez une zone spécifique en devinant des villes d'un seul département choisi via son numéro.
+### 📖 Mode Histoire
+- Progressez à travers des niveaux de difficulté croissante.
+- Catégories : France, Capitales, départements spécifiques, pays européens.
+- Progression sauvegardée localement.
 
-- **📖 Mode Histoire**
-  - Progressez à travers des niveaux de difficulté croissante (Facile, Moyen, Difficile, Très Difficile, Expert).
-  - Débloquez de nouvelles régions et catégories (France, Capitales mondiales, Haute-Garonne, Tarn, Loire-Atlantique, Aveyron, etc.).
-  - Votre progression est sauvegardée localement dans votre navigateur.
+### ⏱️ Contre-la-montre
+- Maximum de villes en 2 minutes. Bonus de temps (+30s) / pénalité (-20s).
+- **Leaderboard mondial temps réel** (Top 100) via Socket.io.
 
-- **⏱️ Mode Contre-la-montre (Time Attack)**
-  - Trouvez le maximum de villes en 2 minutes chrono !
-  - Gagnez du temps bonus (+30s) en cas de victoire, mais attention aux pénalités (-20s) en cas d'échec.
-  - Grimpez dans le **Leaderboard mondial en temps réel** (Top 100).
+### 🌐 Multijoueur en ligne
+- Salons privés (code 4 lettres). Jusqu'à plusieurs joueurs simultanés.
+- Même ville pour tous, score basé sur les essais.
 
-- **🌐 Mode Multijoueur en ligne (Online)**
-  - Créez des salons privés (Rooms) avec un code de 4 lettres pour jouer avec vos amis.
-  - L'hôte configure et lance la partie (10 manches par défaut).
-  - Affrontez-vous en temps réel : tous les joueurs cherchent la même ville simultanément.
-  - Système de score dynamique basé sur le nombre d'essais.
+### 📅 Défi du Jour
+- Une ville unique par jour, identique pour tous les joueurs.
+
+### 📊 Plus ou Moins (Population)
+- Deux villes affichées. Devinez laquelle a la population la plus élevée.
+- Animation slide fluide. Meilleur score sauvegardé.
+
+### 🧭 Nord ou Sud (Latitude)
+- Même principe, mais comparez la **latitude** des villes.
+- **Mini-carte** interactive au centre avec dégradé Nord/Sud, expandable en plein écran.
+
+### 📡 Radar
+- **Aucune carte.** Tapez des noms de villes et recevez des indices distance/direction.
+- **Radar SVG animé** avec balayage rotatif et blips de triangulation.
+- 4 niveaux de difficulté (Facile → Expert) contrôlant le pool de villes et le nombre d'essais.
 
 ## 🛠️ Stack Technique
 
-Le projet repose sur une architecture moderne Full-Stack JavaScript/TypeScript :
+| Technologie | Usage |
+|---|---|
+| [Next.js](https://nextjs.org/) (App Router) | Frontend / Framework React 19 |
+| [Tailwind CSS v4](https://tailwindcss.com/) | Style et design system |
+| [Leaflet](https://leafletjs.com/) | Cartographie interactive |
+| [Socket.io](https://socket.io/) | Multijoueur temps réel + Leaderboard |
+| [Supabase](https://supabase.com/) | Base de données |
+| Node.js (serveur custom) | Serveur WebSocket + Next.js |
 
-- **Frontend / Framework :** [Next.js](https://nextjs.org/) (App Router), React 19
-- **Style :** [Tailwind CSS v4](https://tailwindcss.com/)
-- **Cartographie :** [Leaflet](https://leafletjs.com/) avec `react-leaflet`
-- **Calculs Géographiques :** `geolib`
-- **Backend / Temps Réel :** Serveur Node.js personnalisé (`server.js`) utilisant [Socket.io](https://socket.io/) pour le multijoueur (gestion des instances de parties) et le Leaderboard.
-- **Base de données / Backend as a Service :** [Supabase](https://supabase.com/) (clients configurés)
+## 📦 Installation
 
-## 📦 Installation et Lancement
+```bash
+# Cloner le dépôt
+git clone <URL_DU_DEPOT>
+cd city-guessr
 
-Assurez-vous d'avoir [Node.js](https://nodejs.org/) installé sur votre machine.
+# Installer les dépendances
+npm install
 
-1. **Cloner le dépôt :**
-   ```bash
-   git clone <URL_DU_DEPOT>
-   cd city-guessr
-   ```
+# Lancer le serveur de développement
+npm run dev
+# ou
+npm start
+```
 
-2. **Installer les dépendances :**
-   ```bash
-   npm install
-   ```
+Accéder à l'application : [http://localhost:3000](http://localhost:3000)
 
-3. **Lancer le serveur de développement :**
-   Le projet utilise un Custom Server Node.js pour gérer conjointement l'application Next.js et Socket.io sur le même port. L'utilisation classique de `next dev` ne lancerait pas le serveur Socket.io.
-   ```bash
-   npm run dev
-   # ou
-   npm start
-   ```
-
-4. **Accéder à l'application :**
-   Ouvrez votre navigateur et accédez à [http://localhost:3000](http://localhost:3000).
+> **Note :** Le projet utilise un Custom Server Node.js (`server.js`) qui gère conjointement Next.js et Socket.io sur le même port.
 
 ## 📂 Structure du Projet
 
-L'architecture principale du projet est structurée ainsi :
-
-- `/app` : Pages et routing de l'application Next.js (App Router).
-- `/components` : Composants React réutilisables (interface, carte `Map`, barre de recherche, menus).
-- `/data` : Fichiers statiques et listes de villes (`cities.json`, niveaux histoire dans `storyLevels.ts`, etc.).
-- `/hooks` : Hooks React personnalisés (gestion de l'état du jeu).
-- `/lib` : Configurations d'outils externes (comme le client Supabase).
-- `/utils` : Fonctions utilitaires (calculs de score avec `geolib`, manipulation des données).
-- `server.js` : Point d'entrée Node.js qui initialise Next.js et configure le serveur de WebSockets (`socket.io`) pour les Rooms multijoueurs et le Leaderboard.
-- `SPECS.md` : Documentation technique détaillée des modèles de données et flux de l'application.
+```
+├── app/                 # Pages et routing Next.js (App Router)
+├── components/          # Composants React (17 fichiers)
+│   ├── MainMenu.tsx     # Menu principal (9 modes)
+│   ├── GameOverlay.tsx  # Interface de jeu solo
+│   ├── MapComponent.tsx # Carte Leaflet
+│   ├── HigherLowerGame.tsx  # Plus ou Moins / Nord ou Sud
+│   ├── MiniMapNorthSouth.tsx # Mini-carte avec dégradé N/S
+│   ├── RadarGame.tsx    # Mode Radar (SVG animé)
+│   └── ...              # Menus, lobbys, leaderboard
+├── data/                # Données statiques (cities.json, storyLevels.ts)
+├── hooks/               # Hooks React (gestion d'état du jeu)
+├── lib/                 # Configuration Supabase
+├── utils/               # Fonctions utilitaires (distance, direction, hints)
+├── server.js            # Serveur Node.js (Next.js + Socket.io)
+├── SPECS.md             # Spécifications techniques détaillées
+└── README.md            # Ce fichier
+```
 
 ## 📝 Spécifications Détaillées
 
-Pour plus de détails techniques précis sur l'architecture, les différents objets de données (`RoomState`, `PlayerState`, etc.) et les processus logiques de de l'application, veuillez consulter le fichier de spécifications :
+Pour les détails techniques (modèles de données, flux, architecture) :
 👉 **[`SPECS.md`](./SPECS.md)**
 
 ---
-*Ce projet a été initialisé avec Next.js et fonctionne de manière autonome avec son serveur Node.js embarqué.*
+*Projet Next.js avec serveur Node.js embarqué.*

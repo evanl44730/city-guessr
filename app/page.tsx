@@ -15,6 +15,7 @@ import { generateStoryLevelsForDepartment, generateStoryLevelsForCountry } from 
 import EuropeMenu from '@/components/EuropeMenu';
 import DailyMenu from '@/components/DailyMenu';
 import HigherLowerGame from '@/components/HigherLowerGame';
+import RadarGame from '@/components/RadarGame';
 
 // Dynamically import MapWrapper to avoid SSR issues with Leaflet
 const MapWrapper = dynamic(() => import('@/components/MapWrapper'), {
@@ -31,6 +32,7 @@ export default function Home() {
   const [showDailyMenu, setShowDailyMenu] = useState(false);
   const [showHigherLower, setShowHigherLower] = useState(false);
   const [higherLowerType, setHigherLowerType] = useState<'population' | 'latitude'>('population');
+  const [showRadar, setShowRadar] = useState(false);
 
   const [storyCategory, setStoryCategory] = useState<string>('france');
 
@@ -101,7 +103,7 @@ export default function Home() {
     return citiesData;
   }, [gameMode, citiesData, selectedDepartment, selectedCountry, storyCategory]);
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
@@ -120,6 +122,9 @@ export default function Home() {
     } else if (mode === 'north_south') {
       setHigherLowerType('latitude');
       setShowHigherLower(true);
+      setInMenu(false);
+    } else if (mode === 'radar') {
+      setShowRadar(true);
       setInMenu(false);
     } else {
       restartGame(mode);
@@ -176,6 +181,7 @@ export default function Home() {
     setShowEuropeMenu(false);
     setShowDailyMenu(false);
     setShowHigherLower(false);
+    setShowRadar(false);
     setInMenu(true);
     restartGame('france'); // Reset to default mode to clear online state if needed
   };
@@ -247,11 +253,16 @@ export default function Home() {
         </div>
       )}
 
-      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && !showHigherLower && <MainMenu onSelectMode={handleStartGame} />}
+      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && !showHigherLower && !showRadar && <MainMenu onSelectMode={handleStartGame} />}
 
       {/* HIGHER LOWER MODE */}
       {showHigherLower && (
         <HigherLowerGame gameType={higherLowerType} citiesData={citiesData} onBack={handleBackToMenu} />
+      )}
+
+      {/* RADAR MODE */}
+      {showRadar && (
+        <RadarGame citiesData={citiesData} onBack={handleBackToMenu} />
       )}
 
       {showStoryMenu && (

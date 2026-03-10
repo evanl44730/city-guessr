@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Home, ArrowUp, ArrowDown, RotateCcw, Trophy, Compass } from 'lucide-react';
 import { CityData } from '@/utils/gameUtils';
+import dynamic from 'next/dynamic';
+
+const MiniMapNorthSouth = dynamic(() => import('./MiniMapNorthSouth'), {
+    ssr: false,
+    loading: () => <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-slate-800 animate-pulse border-4 border-slate-900" />,
+});
 
 interface HigherLowerGameProps {
     gameType: 'population' | 'latitude';
@@ -336,10 +342,20 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
                 )}
             </div>
 
-            {/* VS Badge (Center) - Kept out of the sliding track so it stays centered permanently */}
-            <div className="absolute top-[50vh] md:top-1/2 left-[50vw] -translate-x-1/2 -translate-y-1/2 z-20 bg-white text-slate-900 rounded-full w-12 h-12 md:w-16 md:h-16 flex items-center justify-center font-black text-xl md:text-2xl shadow-2xl border-4 border-slate-900">
-                VS
-            </div>
+            {/* Center Element: VS badge OR Mini Map */}
+            {gameType === 'latitude' && cityA ? (
+                <div className="absolute top-[50vh] md:top-1/2 left-[50vw] -translate-x-1/2 -translate-y-1/2 z-20">
+                    <MiniMapNorthSouth 
+                        lat={cityA.coords.lat} 
+                        lng={cityA.coords.lng} 
+                        cityName={cityA.name} 
+                    />
+                </div>
+            ) : (
+                <div className="absolute top-[50vh] md:top-1/2 left-[50vw] -translate-x-1/2 -translate-y-1/2 z-20 bg-white text-slate-900 rounded-full w-12 h-12 md:w-16 md:h-16 flex items-center justify-center font-black text-xl md:text-2xl shadow-2xl border-4 border-slate-900">
+                    VS
+                </div>
+            )}
 
                 {/* GAME OVER SCREEN */}
                 {gameState === 'lost' && (
