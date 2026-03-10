@@ -85,11 +85,24 @@ export const getDifficultyFromPopulation = (population: number): 'Facile' | 'Moy
 
 // Generate hint string (e.g. "T-------" or "S---- E------")
 export const generateHintString = (cityName: string): string => {
-    return cityName.split(' ').map(word => {
-        if (word.length <= 1) return word;
-        // Keep first letter, replace rest with dashes (handling hyphens if any)
-        const firstLetter = word[0];
-        const rest = word.slice(1).replace(/[a-zA-Zà-üÀ-Ü]/g, '-');
-        return firstLetter + rest;
-    }).join(' ');
+    let hint = "";
+    let isNewWord = true;
+    for (const char of cityName) {
+        if (/\p{L}/u.test(char)) {
+            if (isNewWord) {
+                hint += char;
+                isNewWord = false;
+            } else {
+                hint += '_';
+            }
+        } else {
+            isNewWord = true;
+            if (char === '-') {
+                hint += ' - ';
+            } else {
+                hint += char;
+            }
+        }
+    }
+    return hint;
 };

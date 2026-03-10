@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from "react-leaflet";
+import { useEffect, useState, useMemo } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { CityData } from "@/utils/gameUtils";
@@ -78,10 +78,75 @@ function MapController({ center, zoom, gameState }: { center: [number, number]; 
 
 export default function MapComponent({ center, zoom, guesses, targetCity, gameState }: MapComponentProps) {
   const [mounted, setMounted] = useState(false);
+  const [cityBoundary, setCityBoundary] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch City Boundary
+  useEffect(() => {
+    if (!targetCity) {
+      setCityBoundary(null);
+      return;
+    }
+
+    let isMounted = true;
+    setCityBoundary(null); // Clear previous boundary
+
+    async function fetchBoundary() {
+      try {
+        // Determine whether this is a French city or international based on category
+        const isFrance = targetCity!.category.includes('france_metropole') || 
+                         targetCity!.category.includes('france_dom') || 
+                         targetCity!.category.some(c => c.startsWith('dept_'));
+
+        if (isFrance) {
+          // Use official French Geo API (fast and highly accurate)
+          const res = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(targetCity!.name)}&fields=nom,contour,codesPostaux&format=geojson&geometry=contour`);
+          if (!res.ok) throw new Error('Failed to fetch from geo.api.gouv.fr');
+          const data = await res.json();
+          
+          if (isMounted && data.features && data.features.length > 0) {
+            // Find an exact match if multiple communes share a similar name
+            const exactMatch = data.features.find((f: any) => f.properties.nom.toLowerCase() === targetCity!.name.toLowerCase());
+            if (exactMatch) {
+              setCityBoundary(exactMatch);
+              return;
+            } else {
+              setCityBoundary(data.features[0]); // Fallback to first result
+              return;
+            }
+          }
+        }
+
+        // Fallback or International: OSM Nominatim
+        const countryContext = isFrance ? '&country=France' : '';
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(targetCity!.name)}${countryContext}&format=json&polygon_geojson=1`);
+        if (!res.ok) throw new Error('Failed to fetch from Nominatim');
+        const data = await res.json();
+        
+        if (isMounted && data.length > 0) {
+           // Look for relation boundaries with geojson
+           const validOutlines = data.filter((d: any) => d.geojson && (d.geojson.type === 'Polygon' || d.geojson.type === 'MultiPolygon'));
+           const best = validOutlines.find((d: any) => d.osm_type === 'relation' && d.class === 'boundary') || validOutlines[0];
+           
+           if (best) {
+              setCityBoundary(best.geojson);
+           }
+        }
+      } catch (error) {
+        console.error("Failed to load boundary:", error);
+      }
+    }
+
+    // Add a slight delay to prevent spamming APIs while scrolling/skipping
+    const timeout = setTimeout(fetchBoundary, 300);
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+    };
+  }, [targetCity]);
 
   if (!mounted) {
     return <div className="h-full w-full bg-slate-100 flex items-center justify-center">Loading Map...</div>;
@@ -161,6 +226,21 @@ export default function MapComponent({ center, zoom, guesses, targetCity, gameSt
             ]}
             color="red"
             dashArray="10, 10"
+          />
+        )}
+
+        {/* City Boundary Polygon */}
+        {cityBoundary && (
+          <GeoJSON 
+            key={targetCity?.name || 'boundary'} 
+            data={cityBoundary} 
+            pathOptions={{ 
+              color: '#ef4444', // Red-500
+              weight: 3, 
+              fillColor: '#ef4444', 
+              fillOpacity: 0.1,
+              dashArray: '5, 5' // Optional Dashed outline
+            }} 
           />
         )}
 

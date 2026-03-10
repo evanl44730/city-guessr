@@ -326,7 +326,10 @@ export function useGame() {
                     if (c.name !== level.cityName) return false;
                     
                     // For dynamic categories (departments and countries), enforce exact category match
-                    if (level.category.startsWith('dept_') || level.category.startsWith('country_')) {
+                    if (level.category.startsWith('dept_')) {
+                        const depId = level.category.replace('dept_', '');
+                        return c.zip && c.zip.startsWith(depId);
+                    } else if (level.category.startsWith('country_')) {
                         return c.category.includes(level.category);
                     }
                     
