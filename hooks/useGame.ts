@@ -47,6 +47,7 @@ export function useGame() {
     // Time Attack State
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(120); // 2 minutes start
+    const [timeAttackBest, setTimeAttackBest] = useState(0);
 
     // Online State
     const [roomId, setRoomId] = useState<string>('');
@@ -133,6 +134,11 @@ export function useGame() {
                 console.error("Failed to load daily save", e);
             }
         }
+
+        const savedTA = localStorage.getItem('timeAttackBestScore');
+        if (savedTA) {
+            setTimeAttackBest(parseInt(savedTA, 10) || 0);
+        }
     }, []);
 
     // Timer Logic for Time Attack
@@ -144,6 +150,15 @@ export function useGame() {
                 if (prev <= 1) {
                     clearInterval(timer);
                     setGameState('ended');
+                    // Save best score
+                    setScore(currentScore => {
+                        const savedBest = parseInt(localStorage.getItem('timeAttackBestScore') || '0', 10);
+                        if (currentScore > savedBest) {
+                            localStorage.setItem('timeAttackBestScore', currentScore.toString());
+                            setTimeAttackBest(currentScore);
+                        }
+                        return currentScore;
+                    });
                     return 0;
                 }
                 return prev - 1;
@@ -324,7 +339,7 @@ export function useGame() {
                 // by matching the level's specific category if it's a dynamic mode.
                 const city = pool.find(c => {
                     if (c.name !== level.cityName) return false;
-                    
+
                     // For dynamic categories (departments and countries), enforce exact category match
                     if (level.category.startsWith('dept_')) {
                         const depId = level.category.replace('dept_', '');
@@ -332,10 +347,10 @@ export function useGame() {
                     } else if (level.category.startsWith('country_')) {
                         return c.category.includes(level.category);
                     }
-                    
+
                     return true; // Fallback for classic 'france' / 'capital'
                 });
-                
+
                 if (city) {
                     setTargetCity(city);
                     return;

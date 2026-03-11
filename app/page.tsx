@@ -16,6 +16,7 @@ import EuropeMenu from '@/components/EuropeMenu';
 import DailyMenu from '@/components/DailyMenu';
 import HigherLowerGame from '@/components/HigherLowerGame';
 import RadarGame from '@/components/RadarGame';
+import ProfilePage from '@/components/ProfilePage';
 
 // Dynamically import map components to avoid SSR issues with Leaflet
 const ShapeGame = dynamic(() => import('@/components/ShapeGame'), {
@@ -40,6 +41,15 @@ const MapWrapper = dynamic(() => import('@/components/MapWrapper'), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-slate-100 animate-pulse rounded-xl" />
 });
+const DistanceGame = dynamic(() => import('@/components/DistanceGame'), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500 mb-4"></div>
+      <h2 className="text-xl font-bold text-white tracking-widest uppercase">Chargement...</h2>
+    </div>
+  )
+});
 
 export default function Home() {
   const [inMenu, setInMenu] = useState(true);
@@ -53,6 +63,8 @@ export default function Home() {
   const [showRadar, setShowRadar] = useState(false);
   const [showShapeGame, setShowShapeGame] = useState(false);
   const [showDeptTimeAttack, setShowDeptTimeAttack] = useState(false);
+  const [showDistanceGame, setShowDistanceGame] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const [storyCategory, setStoryCategory] = useState<string>('france');
 
@@ -123,7 +135,7 @@ export default function Home() {
     return citiesData;
   }, [gameMode, citiesData, selectedDepartment, selectedCountry, storyCategory]);
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar' | 'shape' | 'dept_time_attack') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar' | 'shape' | 'dept_time_attack' | 'distance' | 'profile') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
@@ -151,6 +163,12 @@ export default function Home() {
       setInMenu(false);
     } else if (mode === 'dept_time_attack') {
       setShowDeptTimeAttack(true);
+      setInMenu(false);
+    } else if (mode === 'distance') {
+      setShowDistanceGame(true);
+      setInMenu(false);
+    } else if (mode === 'profile') {
+      setShowProfile(true);
       setInMenu(false);
     } else {
       restartGame(mode);
@@ -210,6 +228,8 @@ export default function Home() {
     setShowRadar(false);
     setShowShapeGame(false);
     setShowDeptTimeAttack(false);
+    setShowDistanceGame(false);
+    setShowProfile(false);
     setInMenu(true);
     restartGame('france'); // Reset to default mode to clear online state if needed
   };
@@ -281,7 +301,7 @@ export default function Home() {
         </div>
       )}
 
-      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && !showHigherLower && !showRadar && !showDeptTimeAttack && <MainMenu onSelectMode={handleStartGame} />}
+      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && !showHigherLower && !showRadar && !showDeptTimeAttack && !showDistanceGame && !showProfile && <MainMenu onSelectMode={handleStartGame} />}
 
       {/* HIGHER LOWER MODE */}
       {showHigherLower && (
@@ -393,6 +413,14 @@ export default function Home() {
 
       {showDeptTimeAttack && (
         <DepartmentTimeAttack onBack={handleBackToMenu} />
+      )}
+
+      {showDistanceGame && (
+        <DistanceGame citiesData={citiesData} onBack={handleBackToMenu} />
+      )}
+
+      {showProfile && (
+        <ProfilePage onBack={handleBackToMenu} />
       )}
 
       <footer className="mt-4 md:mt-8 pb-2 text-center text-slate-500 text-[10px] md:text-xs font-medium tracking-widest uppercase z-10 opacity-70 hover:opacity-100 transition-opacity">

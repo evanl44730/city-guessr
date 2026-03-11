@@ -1,8 +1,8 @@
-import { Map, Globe, Trophy, Users, LayoutGrid, Calendar, TrendingUp, Compass, Radar, Clock } from 'lucide-react';
+import { Map, Globe, Trophy, Users, LayoutGrid, Calendar, TrendingUp, Compass, Radar, Clock, Ruler, User } from 'lucide-react';
 import Image from 'next/image';
 
 interface MainMenuProps {
-    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar' | 'shape' | 'dept_time_attack') => void;
+    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar' | 'shape' | 'dept_time_attack' | 'distance' | 'profile') => void;
 }
 
 export default function MainMenu({ onSelectMode }: MainMenuProps) {
@@ -29,6 +29,13 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                     <p className="text-slate-300 text-lg md:text-2xl font-light tracking-wide">
                         Explorez le monde, devinez les villes.
                     </p>
+                    <button
+                        onClick={() => onSelectMode('profile')}
+                        className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-sm hover:bg-amber-500/20 hover:border-amber-500/50 transition-all hover:scale-105"
+                    >
+                        <User className="w-4 h-4" />
+                        Mon Profil
+                    </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
@@ -211,6 +218,20 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-fuchsia-300 transition-colors">L'Ombre Mystère</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
                             Devinez le territoire.
+                        </p>
+                    </button>
+
+                    <button
+                        onClick={() => onSelectMode('distance')}
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-teal-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-300"
+                    >
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-teal-500/20 text-teal-400 mb-4 md:mb-6 group-hover:bg-teal-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-teal-500/10">
+                            <Ruler className="w-8 h-8 md:w-12 md:h-12" />
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-teal-300 transition-colors">Le Juste km</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                            Estimez la distance !
                         </p>
                     </button>
                 </div>
