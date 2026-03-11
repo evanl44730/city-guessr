@@ -116,10 +116,10 @@ export function generateStoryLevelsForDepartment(departmentId: string, cities: C
     // Or, unique IDs per department: 200 + index? If there are 101 departments, that could overlap.
     // Let's use 1000 * depNum + index
     // Note: depId can be "2A" or "2B", so hash it or just use a stable formula
-    
+
     // Sort cities by population (descending) to assign difficulty: most populated = Easy, least = Expert
     const sortedCities = [...cities].sort((a, b) => b.population - a.population);
-    
+
     return sortedCities.slice(0, 30).map((city, index) => {
         let difficulty: StoryLevel['difficulty'] = 'Easy';
         if (index >= 10 && index < 20) difficulty = 'Medium';
@@ -136,7 +136,7 @@ export function generateStoryLevelsForDepartment(departmentId: string, cities: C
         if (departmentId === '2A') deptNum = 201;
         else if (departmentId === '2B') deptNum = 202;
         else deptNum = parseInt(departmentId) || 0; // works for 971, etc.
-        
+
         const uniqueId = (deptNum * 1000) + (index + 1);
 
         return {
@@ -151,23 +151,23 @@ export function generateStoryLevelsForDepartment(departmentId: string, cities: C
 }
 
 /**
- * Generate StoryLevels for a specific country (5 levels)
+ * Generate StoryLevels for a specific country (up to 15 levels)
  */
 export function generateStoryLevelsForCountry(countryId: string, cities: CityData[]): StoryLevel[] {
     const categoryName = `country_${countryId}`;
 
     const sortedCities = [...cities].sort((a, b) => b.population - a.population);
-    
+
     // Country IDs are strings like "IT", we need a reliable numeric hash to avoid ID collisions
     // Simple hash: charCodeAt(0) * 1000 + charCodeAt(1) * 10
     const hash = (countryId.charCodeAt(0) * 1000) + (countryId.charCodeAt(1) * 10);
-    
-    return sortedCities.slice(0, 5).map((city, index) => {
+
+    return sortedCities.slice(0, 15).map((city, index) => {
         let difficulty: StoryLevel['difficulty'] = 'Easy';
-        if (index === 1) difficulty = 'Medium';
-        if (index === 2) difficulty = 'Hard';
-        if (index === 3) difficulty = 'Very Hard';
-        if (index === 4) difficulty = 'Expert';
+        if (index >= 3 && index <= 6) difficulty = 'Medium';
+        if (index >= 7 && index <= 10) difficulty = 'Hard';
+        if (index >= 11 && index <= 12) difficulty = 'Very Hard';
+        if (index >= 13) difficulty = 'Expert';
 
         return {
             id: hash + index + 1, // e.g., 73841, 73842...

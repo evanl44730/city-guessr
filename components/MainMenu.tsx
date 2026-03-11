@@ -1,8 +1,8 @@
-import { Map, Globe, Trophy, Users, LayoutGrid, Calendar, TrendingUp, Compass, Radar } from 'lucide-react';
+import { Map, Globe, Trophy, Users, LayoutGrid, Calendar, TrendingUp, Compass, Radar, Clock } from 'lucide-react';
 import Image from 'next/image';
 
 interface MainMenuProps {
-    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar') => void;
+    onSelectMode: (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar' | 'shape' | 'dept_time_attack') => void;
 }
 
 export default function MainMenu({ onSelectMode }: MainMenuProps) {
@@ -122,11 +122,25 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                     >
                         <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <div className="p-4 md:p-6 rounded-2xl bg-red-500/20 text-red-400 mb-4 md:mb-6 group-hover:bg-red-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-red-500/10">
-                            <Trophy className="w-8 h-8 md:w-12 md:h-12" />
+                            <Clock className="w-8 h-8 md:w-12 md:h-12" />
                         </div>
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-red-300 transition-colors">Contre-la-montre</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
-                            Trouvez un max de villes en 2 min.
+                            Trouvez 15 villes vite.
+                        </p>
+                    </button>
+
+                    <button
+                        onClick={() => onSelectMode('dept_time_attack')}
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-orange-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-300"
+                    >
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-orange-500/20 text-orange-400 mb-4 md:mb-6 group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-orange-500/10">
+                            <Clock className="w-8 h-8 md:w-12 md:h-12" />
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-orange-300 transition-colors">Chrono Départements</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                            101 clics, sans erreur !
                         </p>
                     </button>
 
@@ -183,6 +197,20 @@ export default function MainMenu({ onSelectMode }: MainMenuProps) {
                         <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-green-300 transition-colors">Radar</h2>
                         <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
                             Sans carte. Triangulez !
+                        </p>
+                    </button>
+
+                    <button
+                        onClick={() => onSelectMode('shape')}
+                        className="group relative flex flex-col items-center p-4 md:p-6 rounded-3xl bg-slate-800/40 backdrop-blur-md border border-white/10 hover:border-fuchsia-500/50 hover:bg-slate-800/60 hover:-translate-y-2 hover:shadow-2xl hover:shadow-fuchsia-500/20 transition-all duration-300"
+                    >
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-fuchsia-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="p-4 md:p-6 rounded-2xl bg-fuchsia-500/20 text-fuchsia-400 mb-4 md:mb-6 group-hover:bg-fuchsia-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-lg shadow-fuchsia-500/10">
+                            <LayoutGrid className="w-8 h-8 md:w-12 md:h-12" />
+                        </div>
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-fuchsia-300 transition-colors">L'Ombre Mystère</h2>
+                        <p className="text-slate-400 text-center text-xs md:text-sm leading-relaxed group-hover:text-slate-200 transition-colors">
+                            Devinez le territoire.
                         </p>
                     </button>
                 </div>

@@ -52,7 +52,7 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
 
     const getNextCity = useCallback((currentCity: CityData, currentScore: number) => {
         if (validCities.length < 2) return currentCity;
-        
+
         const currentIndex = validCities.findIndex(c => c.name === currentCity.name);
         if (currentIndex === -1) return validCities[0];
 
@@ -68,11 +68,11 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
         // Get candidates within spread, excluding current city and cities with exact same value
         const candidates = validCities.slice(minIndex, maxIndex + 1).filter(c => {
             if (c.name === currentCity.name) return false;
-            
+
             if (gameType === 'population') {
-                 return c.population !== currentCity.population;
+                return c.population !== currentCity.population;
             } else {
-                 return c.coords.lat !== currentCity.coords.lat;
+                return c.coords.lat !== currentCity.coords.lat;
             }
         });
 
@@ -92,7 +92,7 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
 
     const initGame = useCallback(() => {
         if (validCities.length < 2) return;
-        
+
         // Start with a relatively well-known city for City A (top 100)
         let firstCity = validCities[Math.floor(Math.random() * Math.min(100, validCities.length))];
         let secondCity = getNextCity(firstCity, 0);
@@ -114,18 +114,18 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
 
     const handleGuess = (guess: 'higher' | 'lower') => {
         if (gameState !== 'playing' || !cityA || !cityB) return;
-        
+
         setLastGuess(guess);
         setGameState('revealing');
 
         let isHigher = false;
         if (gameType === 'population') {
-             isHigher = cityB.population! > cityA.population!;
+            isHigher = cityB.population! > cityA.population!;
         } else {
-             // In latitude mode, "higher" means "further North" -> higher latitude number
-             isHigher = cityB.coords.lat > cityA.coords.lat;
+            // In latitude mode, "higher" means "further North" -> higher latitude number
+            isHigher = cityB.coords.lat > cityA.coords.lat;
         }
-        
+
         const isCorrect = (guess === 'higher' && isHigher) || (guess === 'lower' && !isHigher);
 
         setTimeout(() => {
@@ -133,12 +133,12 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
                 // Win round! Start sliding phase
                 const newScore = score + 1;
                 setScore(newScore);
-                
+
                 // Prepare the city that will come from the right
                 const upcomingCity = getNextCity(cityB, newScore);
                 setNextCity(upcomingCity);
                 setGameState('sliding');
-                
+
                 // Wait for slide animation to complete, then reset layout
                 setTimeout(() => {
                     setCityA(cityB); // City B is now firmly in A's spot
@@ -200,10 +200,10 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
         // phase 0: A=Light, B=Dark, Next=Light
         // phase 1: A=Dark, B=Light, Next=Dark
         const isLight = colorPhase === 0 ? (type === 'A' || type === 'Next') : (type === 'B');
-        
+
         return {
-            bgClass: isLight 
-                ? 'bg-slate-800/80 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]' 
+            bgClass: isLight
+                ? 'bg-slate-800/80 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]'
                 : 'bg-slate-900 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]',
             gradientClass: isLight ? 'from-blue-500' : 'from-purple-500'
         };
@@ -217,7 +217,7 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
         <div className="absolute inset-0 z-50 flex flex-col md:flex-row bg-slate-900 overflow-hidden font-sans">
             {/* Top Bar / HUD */}
             <div className="absolute top-4 left-0 right-0 z-10 flex justify-between items-center px-4 md:px-8 pointer-events-none">
-                <button 
+                <button
                     onClick={onBack}
                     className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-all pointer-events-auto"
                 >
@@ -230,7 +230,7 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
                             <span className="text-white font-black text-xl">{score}</span>
                         </div>
                     </div>
-                    
+
                     <div className="flex flex-col items-center bg-yellow-500/10 backdrop-blur-md px-4 py-1 rounded-2xl border border-yellow-500/20">
                         <span className="text-xs text-yellow-500/80 font-bold uppercase tracking-wider flex items-center gap-1">
                             <Trophy className="w-3 h-3" /> Record
@@ -243,112 +243,209 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
                 <div className="w-12" /> {/* Spacer to balance flex-between */}
             </div>
 
-            {/* 
-                We create a sliding track that holds 3 city-sized panels:
-                [Old City A] - [Current City B] - [Next City]
-                When 'sliding' is true, we translate this entire track to the left.
-             */}
-            <div 
-                className={`absolute inset-0 flex flex-row transition-transform ease-in-out ${gameState === 'sliding' ? 'duration-[800ms] -translate-x-[100vw] md:-translate-x-[50vw]' : 'duration-0 translate-x-0'}`}
-                style={{ width: '150%' }} // 3 panels: 50vw each on desktop
+            {/* --- DESKTOP TRACK (Left / Right Layout) --- */}
+            <div
+                className={`hidden md:flex absolute inset-0 flex-row transition-transform ease-in-out ${gameState === 'sliding' ? 'duration-[800ms] -translate-x-[50vw]' : 'duration-0 translate-x-0'}`}
+                style={{ width: '150vw' }}
             >
-
-                {/* PANEL 1: CITY A (Top / Left) */}
-                <div className={`w-[100vw] md:w-[50vw] h-[50vh] md:h-full flex flex-col items-center justify-center p-8 relative transition-colors duration-1000 ${gameState === 'lost' ? 'opacity-50 grayscale' : designA.bgClass}`}>
-                    {/* Background Decor */}
+                {/* PANEL 1: CITY A */}
+                <div className={`w-[50vw] h-full flex flex-col items-center justify-center p-8 relative transition-colors duration-1000 ${gameState === 'lost' ? 'opacity-50 grayscale' : designA.bgClass}`}>
                     <div className={`absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${designA.gradientClass} to-transparent transition-colors duration-1000`}></div>
-                    
-                    <h2 className="text-4xl md:text-6xl font-black text-white text-center mb-2 z-10 drop-shadow-xl tracking-tight">{cityA.name}</h2>
-                    <div className="text-white/80 text-lg md:text-xl font-medium tracking-widest uppercase mb-4 z-10">{getLabelText('A')}</div>
-                    <div className="text-5xl md:text-7xl font-black text-blue-400 z-10 drop-shadow-2xl">
+                    <h2 className="text-6xl font-black text-white text-center mb-2 z-10 drop-shadow-xl tracking-tight">{cityA.name}</h2>
+                    <div className="text-white/80 text-xl font-medium tracking-widest uppercase mb-4 z-10">{getLabelText('A')}</div>
+                    <div className="text-7xl font-black text-blue-400 z-10 drop-shadow-2xl">
                         {formatDisplayValue(cityA.population, cityA.coords.lat)}
                     </div>
                 </div>
 
-                {/* PANEL 2: CITY B (Bottom / Right) */}
-                <div className={`w-[100vw] md:w-[50vw] h-[50vh] md:h-full flex flex-col items-center justify-center p-8 relative transition-colors duration-1000 ${gameState === 'lost' ? 'bg-red-900/40 opacity-90' : designB.bgClass}`}>
-                    {/* Background Decor */}
+                {/* PANEL 2: CITY B */}
+                <div className={`w-[50vw] h-full flex flex-col items-center justify-center p-8 relative transition-colors duration-1000 ${gameState === 'lost' ? 'bg-red-900/40 opacity-90' : designB.bgClass}`}>
                     <div className={`absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${designB.gradientClass} to-transparent transition-colors duration-1000`}></div>
+                    <h2 className="text-6xl font-black text-white text-center mb-2 z-10 drop-shadow-xl tracking-tight">{cityB.name}</h2>
 
-                    <h2 className="text-4xl md:text-6xl font-black text-white text-center mb-2 z-10 drop-shadow-xl tracking-tight">{cityB.name}</h2>
-                    
                     {gameState !== 'sliding' && (
-                       <div className="text-white/80 text-lg md:text-xl font-medium tracking-widest uppercase mb-8 z-10">{getLabelText('B_WAITING')}</div>
+                        <div className="text-white/80 text-xl font-medium tracking-widest uppercase mb-8 z-10">{getLabelText('B_WAITING')}</div>
                     )}
-                    
+
                     {gameState === 'sliding' && (
                         <>
-                            <div className="text-white/80 text-lg md:text-xl font-medium tracking-widest uppercase mb-4 z-10">{getLabelText('B_REVEAL')}</div>
-                            <div className="text-5xl md:text-7xl font-black text-blue-400 z-10 drop-shadow-2xl animate-in fade-in zoom-in duration-500">
+                            <div className="text-white/80 text-xl font-medium tracking-widest uppercase mb-4 z-10">{getLabelText('B_REVEAL')}</div>
+                            <div className="text-7xl font-black text-blue-400 z-10 drop-shadow-2xl animate-in fade-in zoom-in duration-500">
                                 {formatDisplayValue(cityB.population, cityB.coords.lat)}
                             </div>
                         </>
                     )}
 
                     {(gameState === 'playing' || gameState === 'revealing') && (
-                        <div className="flex flex-col gap-4 w-full max-w-xs z-10 relative">
+                        <div className="flex flex-col gap-4 w-full max-w-xs z-10 relative mt-4">
                             {gameState === 'playing' ? (
                                 <>
                                     <button
                                         onClick={() => handleGuess('higher')}
-                                        className="group relative flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 w-full py-4 rounded-2xl font-black text-xl md:text-2xl transition-all hover:scale-105 active:scale-95 shadow-xl"
+                                        className="group relative flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-900 w-full py-4 rounded-2xl font-black text-2xl transition-all hover:scale-105 active:scale-95 shadow-xl"
                                     >
-                                        <HigherIcon className="w-6 h-6 md:w-8 md:h-8 group-hover:-translate-y-1 transition-transform" />
+                                        <HigherIcon className="w-8 h-8 group-hover:-translate-y-1 transition-transform" />
                                         {higherBtnLabel}
                                     </button>
                                     <button
                                         onClick={() => handleGuess('lower')}
-                                        className="group relative flex items-center justify-center gap-3 bg-transparent hover:bg-white/10 text-white border-2 border-white/30 w-full py-4 rounded-2xl font-black text-xl md:text-2xl transition-all hover:scale-105 active:scale-95 shadow-xl"
+                                        className="group relative flex items-center justify-center gap-3 bg-transparent hover:bg-white/10 text-white border-2 border-white/30 w-full py-4 rounded-2xl font-black text-2xl transition-all hover:scale-105 active:scale-95 shadow-xl"
                                     >
-                                        <LowerIcon className="w-6 h-6 md:w-8 md:h-8 group-hover:translate-y-1 transition-transform" />
+                                        <LowerIcon className="w-8 h-8 group-hover:translate-y-1 transition-transform" />
                                         {lowerBtnLabel}
                                     </button>
                                 </>
                             ) : (() => {
-                                const isHigherValid = gameType === 'population' 
-                                    ? cityB.population! > cityA.population! 
+                                const isHigherValid = gameType === 'population'
+                                    ? cityB.population! > cityA.population!
                                     : cityB.coords.lat > cityA.coords.lat;
 
                                 return (
-                                <div className={`flex flex-col items-center justify-center animate-in zoom-in duration-500`}>
-                                    <div className={`text-5xl md:text-7xl font-black drop-shadow-2xl mb-4 ${
-                                        (lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid) 
-                                            ? 'text-green-400' 
-                                            : 'text-red-500'
-                                    }`}>
-                                        {formatDisplayValue(cityB.population, cityB.coords.lat)}
+                                    <div className={`flex flex-col items-center justify-center animate-in zoom-in duration-500`}>
+                                        <div className={`text-7xl font-black drop-shadow-2xl mb-4 ${(lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid)
+                                                ? 'text-green-400'
+                                                : 'text-red-500'
+                                            }`}>
+                                            {formatDisplayValue(cityB.population, cityB.coords.lat)}
+                                        </div>
+                                        <div className={`text-xl font-bold uppercase tracking-widest ${(lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid)
+                                                ? 'text-green-400/80'
+                                                : 'text-red-500/80'
+                                            }`}>
+                                            {(lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid) ? 'Correct !' : 'Faux !'}
+                                        </div>
                                     </div>
-                                    <div className={`text-xl font-bold uppercase tracking-widest ${
-                                        (lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid) 
-                                            ? 'text-green-400/80' 
-                                            : 'text-red-500/80'
-                                    }`}>
-                                        { (lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid) ? 'Correct !' : 'Faux !' }
-                                    </div>
-                                </div>
-                            );
-                        })()}
+                                );
+                            })()}
                         </div>
                     )}
-
                 </div>
-                {/* PANEL 3: NEXT CITY (Off-screen Right) */}
-                {nextCity && (
-                    <div className={`w-[100vw] md:w-[50vw] h-[50vh] md:h-full flex flex-col items-center justify-center p-8 relative transition-colors duration-1000 ${designNext.bgClass}`}>
+
+                {/* PANEL 3: NEXT CITY */}
+                {nextCity ? (
+                    <div className={`w-[50vw] h-full flex flex-col items-center justify-center p-8 relative transition-colors duration-1000 ${designNext.bgClass}`}>
                         <div className={`absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${designNext.gradientClass} to-transparent transition-colors duration-1000`}></div>
-                        <h2 className="text-4xl md:text-6xl font-black text-white text-center mb-2 z-10 drop-shadow-xl tracking-tight">{nextCity.name}</h2>
-                        <div className="text-white/80 text-lg md:text-xl font-medium tracking-widest uppercase mb-8 z-10">a une population</div>
+                        <h2 className="text-6xl font-black text-white text-center mb-2 z-10 drop-shadow-xl tracking-tight">{nextCity.name}</h2>
+                        <div className="text-white/80 text-xl font-medium tracking-widest uppercase mb-8 z-10">{getLabelText('NEXT')}</div>
                     </div>
+                ) : (
+                    <div className="w-[50vw] h-full" />
                 )}
+            </div>
+
+            {/* --- MOBILE TRACK (Top / Bottom Layout, Slide Left) --- */}
+            <div
+                className={`flex md:hidden absolute inset-0 flex-row transition-transform ease-in-out ${gameState === 'sliding' ? 'duration-[800ms] -translate-x-[100vw]' : 'duration-0 translate-x-0'}`}
+                style={{ width: '200vw' }}
+            >
+                {/* VIEW 1: Current State */}
+                <div className="w-[100vw] h-[100vh] flex flex-col">
+                    {/* Top Half: City A */}
+                    <div className={`w-full h-[50vh] flex flex-col items-center justify-center p-4 relative transition-colors duration-1000 ${gameState === 'lost' ? 'opacity-50 grayscale' : designA.bgClass}`}>
+                        <div className={`absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${designA.gradientClass} to-transparent transition-colors duration-1000`}></div>
+                        <h2 className="text-3xl font-black text-white text-center mb-1 z-10 drop-shadow-xl tracking-tight truncate w-full px-4">{cityA.name}</h2>
+                        <div className="text-white/80 text-xs font-medium tracking-widest uppercase mb-1 z-10">{getLabelText('A')}</div>
+                        <div className="text-4xl font-black text-blue-400 z-10 drop-shadow-2xl">
+                            {formatDisplayValue(cityA.population, cityA.coords.lat)}
+                        </div>
+                    </div>
+
+                    {/* Bottom Half: City B */}
+                    <div className={`w-full h-[50vh] flex flex-col items-center justify-center p-4 relative transition-colors duration-1000 ${gameState === 'lost' ? 'bg-red-900/40 opacity-90' : designB.bgClass}`}>
+                        <div className={`absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${designB.gradientClass} to-transparent transition-colors duration-1000`}></div>
+                        <h2 className="text-3xl font-black text-white text-center mb-1 z-10 drop-shadow-xl tracking-tight truncate w-full px-4">{cityB.name}</h2>
+
+                        {gameState !== 'sliding' && (
+                            <div className="text-white/80 text-xs font-medium tracking-widest uppercase mb-4 z-10">{getLabelText('B_WAITING')}</div>
+                        )}
+
+                        {gameState === 'sliding' && (
+                            <>
+                                <div className="text-white/80 text-xs font-medium tracking-widest uppercase mb-2 z-10">{getLabelText('B_REVEAL')}</div>
+                                <div className="text-4xl font-black text-blue-400 z-10 drop-shadow-2xl animate-in fade-in zoom-in duration-500">
+                                    {formatDisplayValue(cityB.population, cityB.coords.lat)}
+                                </div>
+                            </>
+                        )}
+
+                        {(gameState === 'playing' || gameState === 'revealing') && (
+                            <div className="flex flex-col gap-2 w-full max-w-xs z-10 relative mt-2">
+                                {gameState === 'playing' ? (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => handleGuess('higher')}
+                                            className="group relative flex flex-col items-center justify-center gap-1 bg-white hover:bg-slate-100 text-slate-900 w-full py-3 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl"
+                                        >
+                                            <HigherIcon className="w-5 h-5" />
+                                            {higherBtnLabel}
+                                        </button>
+                                        <button
+                                            onClick={() => handleGuess('lower')}
+                                            className="group relative flex flex-col items-center justify-center gap-1 bg-transparent hover:bg-white/10 text-white border-2 border-white/30 w-full py-3 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl"
+                                        >
+                                            <LowerIcon className="w-5 h-5" />
+                                            {lowerBtnLabel}
+                                        </button>
+                                    </div>
+                                ) : (() => {
+                                    const isHigherValid = gameType === 'population'
+                                        ? cityB.population! > cityA.population!
+                                        : cityB.coords.lat > cityA.coords.lat;
+
+                                    return (
+                                        <div className={`flex flex-col items-center justify-center animate-in zoom-in duration-500`}>
+                                            <div className={`text-4xl font-black drop-shadow-2xl mb-1 ${(lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid)
+                                                    ? 'text-green-400'
+                                                    : 'text-red-500'
+                                                }`}>
+                                                {formatDisplayValue(cityB.population, cityB.coords.lat)}
+                                            </div>
+                                            <div className={`text-sm font-bold uppercase tracking-widest ${(lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid)
+                                                    ? 'text-green-400/80'
+                                                    : 'text-red-500/80'
+                                                }`}>
+                                                {(lastGuess === 'higher' && isHigherValid) || (lastGuess === 'lower' && !isHigherValid) ? 'Correct !' : 'Faux !'}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* VIEW 2: Next State (only visible during slide) */}
+                <div className="w-[100vw] h-[100vh] flex flex-col">
+                    {/* Top Half: City B (acts as new A) */}
+                    <div className={`w-full h-[50vh] flex flex-col items-center justify-center p-4 relative transition-colors duration-1000 ${designB.bgClass}`}>
+                        <div className={`absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${designB.gradientClass} to-transparent transition-colors duration-1000`}></div>
+                        <h2 className="text-3xl font-black text-white text-center mb-1 z-10 drop-shadow-xl tracking-tight truncate w-full px-4">{cityB.name}</h2>
+                        <div className="text-white/80 text-xs font-medium tracking-widest uppercase mb-1 z-10">{getLabelText('A')}</div>
+                        <div className="text-4xl font-black text-blue-400 z-10 drop-shadow-2xl">
+                            {formatDisplayValue(cityB.population, cityB.coords.lat)}
+                        </div>
+                    </div>
+
+                    {/* Bottom Half: Next City */}
+                    {nextCity ? (
+                        <div className={`w-full h-[50vh] flex flex-col items-center justify-center p-4 relative transition-colors duration-1000 ${designNext.bgClass}`}>
+                            <div className={`absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${designNext.gradientClass} to-transparent transition-colors duration-1000`}></div>
+                            <h2 className="text-3xl font-black text-white text-center mb-1 z-10 drop-shadow-xl tracking-tight truncate w-full px-4">{nextCity.name}</h2>
+                            <div className="text-white/80 text-xs font-medium tracking-widest uppercase mb-4 z-10">{getLabelText('NEXT')}</div>
+                        </div>
+                    ) : (
+                        <div className="w-full h-[50vh]" />
+                    )}
+                </div>
             </div>
 
             {/* Center Element: VS badge OR Mini Map */}
             {gameType === 'latitude' && cityA ? (
                 <div className="absolute top-[50vh] md:top-1/2 left-[50vw] -translate-x-1/2 -translate-y-1/2 z-20">
-                    <MiniMapNorthSouth 
-                        lat={cityA.coords.lat} 
-                        lng={cityA.coords.lng} 
-                        cityName={cityA.name} 
+                    <MiniMapNorthSouth
+                        lat={cityA.coords.lat}
+                        lng={cityA.coords.lng}
+                        cityName={cityA.name}
                     />
                 </div>
             ) : (
@@ -357,47 +454,47 @@ export default function HigherLowerGame({ gameType, citiesData, onBack }: Higher
                 </div>
             )}
 
-                {/* GAME OVER SCREEN */}
-                {gameState === 'lost' && (
-                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-500 p-4">
-                        <div className="bg-slate-900 border border-white/10 p-8 md:p-12 rounded-3xl shadow-2xl flex flex-col items-center max-w-md w-full text-center">
-                            <Trophy className="w-16 h-16 text-yellow-400 mb-4" />
-                            <h2 className="text-3xl font-black text-white mb-2">Game Over</h2>
-                            {score >= bestScore && score > 0 ? (
-                                <p className="text-yellow-400 font-bold mb-6">Nouveau Record ! 🎉</p>
-                            ) : (
-                                <p className="text-slate-400 mb-6">Vous avez fait une erreur !</p>
-                            )}
-                            
-                            <div className="flex gap-4 w-full mb-8">
-                                <div className="flex-1 bg-slate-800 py-4 rounded-2xl border border-white/5 flex flex-col items-center">
-                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Score Actuel</div>
-                                    <div className="text-4xl font-black text-white">{score}</div>
-                                </div>
-                                <div className="flex-1 bg-yellow-500/10 py-4 rounded-2xl border border-yellow-500/20 flex flex-col items-center">
-                                    <div className="text-xs text-yellow-500/80 font-bold uppercase tracking-widest flex items-center gap-1 mb-1">
-                                        <Trophy className="w-3 h-3" /> Meilleur
-                                    </div>
-                                    <div className="text-4xl font-black text-yellow-400">{bestScore}</div>
-                                </div>
-                            </div>
+            {/* GAME OVER SCREEN */}
+            {gameState === 'lost' && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-500 p-4">
+                    <div className="bg-slate-900 border border-white/10 p-8 md:p-12 rounded-3xl shadow-2xl flex flex-col items-center max-w-md w-full text-center">
+                        <Trophy className="w-16 h-16 text-yellow-400 mb-4" />
+                        <h2 className="text-3xl font-black text-white mb-2">Game Over</h2>
+                        {score >= bestScore && score > 0 ? (
+                            <p className="text-yellow-400 font-bold mb-6">Nouveau Record ! 🎉</p>
+                        ) : (
+                            <p className="text-slate-400 mb-6">Vous avez fait une erreur !</p>
+                        )}
 
-                            <button
-                                onClick={initGame}
-                                className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg transition-colors mb-3"
-                            >
-                                <RotateCcw className="w-5 h-5" />
-                                Rejouer
-                            </button>
-                            <button
-                                onClick={onBack}
-                                className="w-full py-4 rounded-xl font-bold text-lg text-slate-400 hover:bg-white/5 transition-colors"
-                            >
-                                Retour au menu
-                            </button>
+                        <div className="flex gap-4 w-full mb-8">
+                            <div className="flex-1 bg-slate-800 py-4 rounded-2xl border border-white/5 flex flex-col items-center">
+                                <div className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Score Actuel</div>
+                                <div className="text-4xl font-black text-white">{score}</div>
+                            </div>
+                            <div className="flex-1 bg-yellow-500/10 py-4 rounded-2xl border border-yellow-500/20 flex flex-col items-center">
+                                <div className="text-xs text-yellow-500/80 font-bold uppercase tracking-widest flex items-center gap-1 mb-1">
+                                    <Trophy className="w-3 h-3" /> Meilleur
+                                </div>
+                                <div className="text-4xl font-black text-yellow-400">{bestScore}</div>
+                            </div>
                         </div>
+
+                        <button
+                            onClick={initGame}
+                            className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg transition-colors mb-3"
+                        >
+                            <RotateCcw className="w-5 h-5" />
+                            Rejouer
+                        </button>
+                        <button
+                            onClick={onBack}
+                            className="w-full py-4 rounded-xl font-bold text-lg text-slate-400 hover:bg-white/5 transition-colors"
+                        >
+                            Retour au menu
+                        </button>
                     </div>
-                )}
+                </div>
+            )}
         </div>
     );
 }

@@ -17,7 +17,25 @@ import DailyMenu from '@/components/DailyMenu';
 import HigherLowerGame from '@/components/HigherLowerGame';
 import RadarGame from '@/components/RadarGame';
 
-// Dynamically import MapWrapper to avoid SSR issues with Leaflet
+// Dynamically import map components to avoid SSR issues with Leaflet
+const ShapeGame = dynamic(() => import('@/components/ShapeGame'), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-fuchsia-500 mb-4"></div>
+      <h2 className="text-xl font-bold text-white tracking-widest uppercase">Chargement...</h2>
+    </div>
+  )
+});
+const DepartmentTimeAttack = dynamic(() => import('@/components/DepartmentTimeAttack'), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mb-4"></div>
+      <h2 className="text-xl font-bold text-white tracking-widest uppercase">Chargement...</h2>
+    </div>
+  )
+});
 const MapWrapper = dynamic(() => import('@/components/MapWrapper'), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-slate-100 animate-pulse rounded-xl" />
@@ -33,6 +51,8 @@ export default function Home() {
   const [showHigherLower, setShowHigherLower] = useState(false);
   const [higherLowerType, setHigherLowerType] = useState<'population' | 'latitude'>('population');
   const [showRadar, setShowRadar] = useState(false);
+  const [showShapeGame, setShowShapeGame] = useState(false);
+  const [showDeptTimeAttack, setShowDeptTimeAttack] = useState(false);
 
   const [storyCategory, setStoryCategory] = useState<string>('france');
 
@@ -103,7 +123,7 @@ export default function Home() {
     return citiesData;
   }, [gameMode, citiesData, selectedDepartment, selectedCountry, storyCategory]);
 
-  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar') => {
+  const handleStartGame = (mode: 'france' | 'capital' | 'story' | 'online' | 'time_attack' | 'department' | 'europe' | 'daily' | 'higher_lower' | 'north_south' | 'radar' | 'shape' | 'dept_time_attack') => {
     if (mode === 'story') {
       setShowStoryMenu(true);
     } else if (mode === 'online') {
@@ -125,6 +145,12 @@ export default function Home() {
       setInMenu(false);
     } else if (mode === 'radar') {
       setShowRadar(true);
+      setInMenu(false);
+    } else if (mode === 'shape') {
+      setShowShapeGame(true);
+      setInMenu(false);
+    } else if (mode === 'dept_time_attack') {
+      setShowDeptTimeAttack(true);
       setInMenu(false);
     } else {
       restartGame(mode);
@@ -182,6 +208,8 @@ export default function Home() {
     setShowDailyMenu(false);
     setShowHigherLower(false);
     setShowRadar(false);
+    setShowShapeGame(false);
+    setShowDeptTimeAttack(false);
     setInMenu(true);
     restartGame('france'); // Reset to default mode to clear online state if needed
   };
@@ -253,7 +281,7 @@ export default function Home() {
         </div>
       )}
 
-      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && !showHigherLower && !showRadar && <MainMenu onSelectMode={handleStartGame} />}
+      {inMenu && !showStoryMenu && !showMultiplayerMenu && !showDepartmentMenu && !showEuropeMenu && !showHigherLower && !showRadar && !showDeptTimeAttack && <MainMenu onSelectMode={handleStartGame} />}
 
       {/* HIGHER LOWER MODE */}
       {showHigherLower && (
@@ -290,7 +318,7 @@ export default function Home() {
         />
       )}
 
-      {(!inMenu || (gameMode === 'online' && onlinePhase === 'game')) && (
+      {(!inMenu || (gameMode === 'online' && onlinePhase === 'game')) && !showHigherLower && !showRadar && !showShapeGame && !showDeptTimeAttack && (
         <div className={`max-w-5xl w-full flex flex-col items-center gap-4 md:gap-6 mb-2 md:mb-4 animate-in fade-in slide-in-from-top-4 duration-700 pointer-events-none ${gameState === 'playing' ? 'z-50' : 'z-0'}`}>
           <h1 className="text-2xl md:text-5xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 tracking-tighter drop-shadow-2xl pointer-events-auto">
             CityGuessr
@@ -306,7 +334,7 @@ export default function Home() {
         </div>
       )}
 
-      {(!inMenu || (gameMode === 'online' && onlinePhase === 'game')) && (
+      {(!inMenu || (gameMode === 'online' && onlinePhase === 'game')) && !showHigherLower && !showRadar && !showShapeGame && !showDeptTimeAttack && (
         <div className="w-full max-w-5xl flex flex-col gap-4 relative z-0 animate-in fade-in zoom-in duration-700 delay-100 flex-1 min-h-0">
           <div className="absolute inset-0 z-10 pointer-events-none">
             {gameMode === 'online' ? (
@@ -336,7 +364,7 @@ export default function Home() {
                   }
                 }}
                 onNextLevel={gameMode === 'story' && currentLevelId ? () => {
-                   restartGame('story', currentLevelId + 1);
+                  restartGame('story', currentLevelId + 1);
                 } : undefined}
                 gameMode={gameMode as 'france' | 'capital' | 'story' | 'time_attack' | 'department' | 'europe' | 'daily'}
                 score={score}
@@ -357,6 +385,14 @@ export default function Home() {
             />
           </div>
         </div>
+      )}
+
+      {showShapeGame && (
+        <ShapeGame onBack={handleBackToMenu} />
+      )}
+
+      {showDeptTimeAttack && (
+        <DepartmentTimeAttack onBack={handleBackToMenu} />
       )}
 
       <footer className="mt-4 md:mt-8 pb-2 text-center text-slate-500 text-[10px] md:text-xs font-medium tracking-widest uppercase z-10 opacity-70 hover:opacity-100 transition-opacity">

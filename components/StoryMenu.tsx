@@ -4,6 +4,17 @@ import { Lock, Star, Check, X, Map as MapIcon, Globe, LayoutGrid, ChevronDown } 
 import { DEPARTMENTS } from "@/data/departments";
 import { EUROPEAN_COUNTRIES } from "@/data/europe";
 import { getDifficultyFromPopulation } from "@/utils/gameUtils";
+import dynamic from "next/dynamic";
+
+const FranceMapSelector = dynamic(() => import("./FranceMapSelector"), {
+    ssr: false,
+    loading: () => <div className="w-full h-[300px] md:h-[400px] rounded-2xl bg-slate-800/50 animate-pulse border border-white/10" />
+});
+
+const EuropeMapSelector = dynamic(() => import("./EuropeMapSelector"), {
+    ssr: false,
+    loading: () => <div className="w-full h-[300px] md:h-[400px] rounded-2xl bg-slate-800/50 animate-pulse border border-white/10" />
+});
 
 interface StoryMenuProps {
     onSelectLevel: (levelId: number) => void;
@@ -16,16 +27,16 @@ interface StoryMenuProps {
 
 export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCategory, onSelectCategory, dynamicLevels = [] }: StoryMenuProps) {
     const [regionType, setRegionType] = useState<'main' | 'dept' | 'europe'>(() => {
-        if (selectedCategory.startsWith('dept_')) return 'dept';
-        if (selectedCategory.startsWith('country_')) return 'europe';
+        if (selectedCategory.startsWith('dept_') || selectedCategory === 'dept_root') return 'dept';
+        if (selectedCategory.startsWith('country_') || selectedCategory === 'europe_root') return 'europe';
         return 'main';
     });
 
     const handleRegionTypeChange = (type: string) => {
         setRegionType(type as any);
         if (type === 'main') onSelectCategory('france');
-        if (type === 'dept') onSelectCategory('dept_01'); // Ain
-        if (type === 'europe') onSelectCategory('country_AL'); // Albanie
+        if (type === 'dept') onSelectCategory('dept_root'); // Show map instead of picking dept 01
+        if (type === 'europe') onSelectCategory('europe_root'); // Show map instead of picking Albania
     };
 
     // If it's a built-in category, use STORY_LEVELS. Otherwise, use dynamicLevels passed from useGame.
@@ -37,22 +48,22 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
     const expectedDeptCities = 101 * 30; // 3030
     const expectedEuropeCities = EUROPEAN_COUNTRIES.length * 5; // 45 * 5 = 225
     const expectedClassicCities = 50 + 30; // 80
-    
+
     // We limit total by 3335 (Max theoretic). 
     // In practice, since cities might be missing, 3335 is the absolute 100% completion target.
     const totalLevels = expectedDeptCities + expectedEuropeCities + expectedClassicCities;
-    
+
     // Calculate wins (progress > 0) and failures (progress === -1)
     const progressValues = Object.values(progress);
     const winCount = progressValues.filter(p => p > 0).length;
     const failCount = progressValues.filter(p => p === -1).length;
-    
+
     const winPercentage = Math.min(100, Math.max(0, (winCount / totalLevels) * 100));
     const failPercentage = Math.min(100, Math.max(0, (failCount / totalLevels) * 100));
 
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-2 md:p-4 animate-in fade-in duration-300">
-            <div className="bg-slate-800/50 border border-white/10 rounded-3xl shadow-2xl p-4 md:p-8 w-full max-w-5xl max-h-[90vh] md:max-h-[85vh] flex flex-col overflow-hidden backdrop-blur-xl">
+        <div className="absolute inset-0 z-50 flex justify-center bg-slate-900/80 backdrop-blur-md p-2 md:p-4 animate-in fade-in duration-300 overflow-y-auto custom-scrollbar items-start pt-4 pb-12">
+            <div className="bg-slate-800/50 border border-white/10 rounded-3xl shadow-2xl p-4 md:p-8 w-full max-w-5xl flex flex-col backdrop-blur-xl my-auto">
 
                 {/* Header & Tabs */}
                 <div className="flex flex-col gap-4 mb-6">
@@ -95,13 +106,13 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
                         </div>
                         <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5 relative z-10 flex">
                             {/* Win Bar */}
-                            <div 
+                            <div
                                 className="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-1000 ease-out relative"
                                 style={{ width: `${winPercentage}%` }}
                             >
                             </div>
                             {/* Fail Bar */}
-                            <div 
+                            <div
                                 className="h-full bg-gradient-to-r from-red-500 to-orange-400 transition-all duration-1000 ease-out relative"
                                 style={{ width: `${failPercentage}%` }}
                             >
@@ -113,162 +124,215 @@ export default function StoryMenu({ onSelectLevel, onBack, progress, selectedCat
                         </div>
                     </div>
 
-                    {/* Category Selection Dropdowns */}
-                    <div className="flex flex-col md:flex-row gap-4 relative z-20 w-full mb-2">
-                        
-                        {/* Region Type Dropdown */}
-                        <div className="flex p-1 bg-slate-900/50 rounded-xl relative group w-full md:w-1/3">
-                            <select 
-                                value={regionType}
-                                onChange={(e) => handleRegionTypeChange(e.target.value)}
-                                className="appearance-none w-full bg-slate-800 border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer font-medium shadow-inner"
-                            >
-                                <option value="main">🌍 Modes Classiques</option>
-                                <option value="dept">🇫🇷 Départements</option>
-                                <option value="europe">🇪🇺 Europe</option>
-                            </select>
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-white transition-colors h-5 w-5" />
+                    <div className="flex flex-col gap-4 relative z-20 w-full mb-2">
+
+                        <div className="flex justify-between items-center gap-4">
+                            {/* Region Type Dropdown */}
+                            <div className="flex p-1 bg-slate-900/50 rounded-xl relative group w-full md:w-1/3">
+                                <select
+                                    value={regionType}
+                                    onChange={(e) => handleRegionTypeChange(e.target.value)}
+                                    className="appearance-none w-full bg-slate-800 border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer font-medium shadow-inner"
+                                >
+                                    <option value="main">🌍 Modes Classiques</option>
+                                    <option value="dept">🇫🇷 Départements</option>
+                                    <option value="europe">🇪🇺 Europe</option>
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-white transition-colors h-5 w-5" />
+                            </div>
+
+                            {/* Back to map buttons */}
+                            {regionType === 'dept' && selectedCategory !== 'dept_root' && (
+                                <button
+                                    onClick={() => onSelectCategory('dept_root')}
+                                    className="px-4 py-2.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 font-bold transition-all border border-blue-500/20 flex items-center gap-2"
+                                >
+                                    <MapIcon className="w-4 h-4" /> Retour à la carte
+                                </button>
+                            )}
+                            {regionType === 'europe' && selectedCategory !== 'europe_root' && (
+                                <button
+                                    onClick={() => onSelectCategory('europe_root')}
+                                    className="px-4 py-2.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-bold transition-all border border-emerald-500/20 flex items-center gap-2"
+                                >
+                                    <Globe className="w-4 h-4" /> Retour à la carte
+                                </button>
+                            )}
                         </div>
 
-                        {/* Specific Category Dropdown */}
-                        <div className="flex p-1 bg-slate-900/50 rounded-xl relative group w-full md:w-2/3">
-                            {/* Selected Europe Flag Overlay */}
-                            {regionType === 'europe' && selectedCategory.startsWith('country_') && (
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-                                    <img 
-                                        src={`https://flagcdn.com/w40/${selectedCategory.replace('country_', '').toLowerCase()}.png`}
-                                        srcSet={`https://flagcdn.com/w80/${selectedCategory.replace('country_', '').toLowerCase()}.png 2x`}
-                                        alt=""
-                                        className="h-5 w-auto rounded-[2px] shadow-sm border border-white/10"
-                                    />
+                        {/* Specific Category Dropdown (Only for Main modes now) */}
+                        {regionType === 'main' && (
+                            <div className="flex p-1 bg-slate-900/50 rounded-xl relative group w-full md:w-2/3">
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => onSelectCategory(e.target.value)}
+                                    className={`appearance-none w-full bg-slate-800 border border-white/10 text-white rounded-lg py-2.5 pr-10 outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer font-medium shadow-inner pl-4`}
+                                >
+                                    <option value="france">🇫🇷 France (50 Villes Majeures)</option>
+                                    <option value="capital">🌍 Monde (30 Capitales)</option>
+                                </select>
+                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-white transition-colors h-5 w-5" />
+                            </div>
+                        )}
+
+                        {/* Map Selectors */}
+                        {regionType === 'dept' && selectedCategory === 'dept_root' && (
+                            <div className="w-full mt-2 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10">
+                                <FranceMapSelector onSelectDepartment={(id) => onSelectCategory(id)} progress={progress} />
+                                <div className="absolute top-4 left-4 pointer-events-none z-[500]">
+                                    <div className="bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-xl">
+                                        <p className="text-white font-bold text-sm md:text-base">📍 Choisissez un département</p>
+                                    </div>
                                 </div>
-                            )}
-                            <select 
-                                value={selectedCategory}
-                                onChange={(e) => onSelectCategory(e.target.value)}
-                                className={`appearance-none w-full bg-slate-800 border border-white/10 text-white rounded-lg py-2.5 pr-10 outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer font-medium shadow-inner ${regionType === 'europe' ? 'pl-12' : 'pl-4'}`}
-                            >
-                                {regionType === 'main' && (
-                                    <>
-                                        <option value="france">🇫🇷 France (50 Villes Majeures)</option>
-                                        <option value="capital">🌍 Monde (30 Capitales)</option>
-                                    </>
-                                )}
-                                {regionType === 'dept' && DEPARTMENTS.map(dep => (
-                                    <option key={dep.id} value={`dept_${dep.id}`}>
-                                        {dep.id} - {dep.name} ({dep.region})
-                                    </option>
-                                ))}
-                                {regionType === 'europe' && EUROPEAN_COUNTRIES.map(country => (
-                                    <option key={country.id} value={`country_${country.id}`}>
-                                        {country.emoji} {country.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-white transition-colors h-5 w-5" />
-                        </div>
+                            </div>
+                        )}
+
+                        {regionType === 'europe' && selectedCategory === 'europe_root' && (
+                            <div className="w-full mt-2 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10">
+                                <EuropeMapSelector onSelectCountry={(id) => onSelectCategory(id)} progress={progress} />
+                                <div className="absolute top-4 left-4 pointer-events-none z-[500]">
+                                    <div className="bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-xl">
+                                        <p className="text-white font-bold text-sm md:text-base">🇪🇺 Choisissez un pays</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
+
                 </div>
 
                 {/* Levels Grid */}
-                {filteredLevels.length === 0 ? (
+                {selectedCategory === 'dept_root' || selectedCategory === 'europe_root' ? null : filteredLevels.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 min-h-[300px] text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-4"></div>
                         <p className="font-semibold text-white/80 text-lg mb-2">Chargement en cours...</p>
                         <p className="text-sm">Si le chargement persiste, <strong>actualisez la page (F5)</strong> pour charger les nouvelles données.</p>
                     </div>
                 ) : (
-                <div className="overflow-y-auto grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-4 p-1 md:p-2 custom-scrollbar flex-1 min-h-0">
-                    {filteredLevels.map((level, index) => {
-                        // Unlock logic:
-                        // First level of the currently selected category is always unlocked.
-                        const isFirstLevel = index === 0;
-                        
-                        // A level is unlocked if it's the first level OR if the PREVIOUS level in THIS category is completed in any way (won or failed).
-                        // We check the previous level's ID in the filtered array instead of just `level.id - 1`
-                        // to handle dynamic gaps (like dept_31 having IDs 31001, 31002, etc.)
-                        const previousLevelInCat = index > 0 ? filteredLevels[index - 1] : null;
-                        const isUnlocked = isFirstLevel || (previousLevelInCat && progress[previousLevelInCat.id] !== undefined);
+                    <div className="flex flex-col flex-1 min-h-0">
+                        {/* Display Current Selection Name */}
+                        {regionType !== 'main' && selectedCategory !== 'dept_root' && selectedCategory !== 'europe_root' && (
+                            <div className="mb-3 px-2 flex items-center justify-between animate-in fade-in">
+                                <h3 className="text-xl md:text-2xl font-black text-white flex items-center gap-3">
+                                    {regionType === 'dept' && (
+                                        <>
+                                            <MapIcon className="text-blue-400 h-6 w-6" />
+                                            {DEPARTMENTS.find(d => `dept_${d.id}` === selectedCategory)?.name || "Département"}
+                                            <span className="text-sm font-medium text-slate-400">({DEPARTMENTS.find(d => `dept_${d.id}` === selectedCategory)?.id})</span>
+                                        </>
+                                    )}
+                                    {regionType === 'europe' && (
+                                        <>
+                                            {selectedCategory.startsWith('country_') ? (
+                                                <img
+                                                    src={`https://flagcdn.com/w40/${selectedCategory.replace('country_', '').toLowerCase()}.png`}
+                                                    srcSet={`https://flagcdn.com/w80/${selectedCategory.replace('country_', '').toLowerCase()}.png 2x`}
+                                                    alt="Flag"
+                                                    className="h-5 md:h-6 w-auto rounded shadow-sm border border-white/10"
+                                                />
+                                            ) : (
+                                                <Globe className="text-emerald-400 h-6 w-6" />
+                                            )}
+                                            <span>{EUROPEAN_COUNTRIES.find(c => `country_${c.id}` === selectedCategory)?.name || "Pays"}</span>
+                                        </>
+                                    )}
+                                </h3>
 
-                        const hasPlayed = progress[level.id] !== undefined;
-                        const isCompleted = hasPlayed && progress[level.id] > 0;
-                        const isFailed = hasPlayed && progress[level.id] === -1;
-                        const bestScore = progress[level.id];
+                                {/* Progress for this specific category could be added here if needed */}
+                            </div>
+                        )}
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 md:gap-4 p-1 md:p-2">
+                            {filteredLevels.map((level, index) => {
+                                // Unlock logic:
+                                // First level of the currently selected category is always unlocked.
+                                const isFirstLevel = index === 0;
 
-                        // Prevent playing if already played
-                        const canPlay = isUnlocked && !hasPlayed;
+                                // A level is unlocked if it's the first level OR if the PREVIOUS level in THIS category is completed in any way (won or failed).
+                                // We check the previous level's ID in the filtered array instead of just `level.id - 1`
+                                // to handle dynamic gaps (like dept_31 having IDs 31001, 31002, etc.)
+                                const previousLevelInCat = index > 0 ? filteredLevels[index - 1] : null;
+                                const isUnlocked = isFirstLevel || (previousLevelInCat && progress[previousLevelInCat.id] !== undefined);
 
-                        // Calculate Difficulty Tag
-                        let diffTag: string = level.difficulty;
-                        if (!diffTag && level.population) {
-                            diffTag = getDifficultyFromPopulation(level.population);
-                        }
-                        const isHardOrExpert = diffTag === 'Difficile' || diffTag === 'Hard' || diffTag === 'Expert' || diffTag === 'Very Hard';
+                                const hasPlayed = progress[level.id] !== undefined;
+                                const isCompleted = hasPlayed && progress[level.id] > 0;
+                                const isFailed = hasPlayed && progress[level.id] === -1;
+                                const bestScore = progress[level.id];
 
-                        return (
-                            <button
-                                key={level.id}
-                                onClick={() => canPlay && onSelectLevel(level.id)}
-                                disabled={!canPlay}
-                                className={`
+                                // Prevent playing if already played
+                                const canPlay = isUnlocked && !hasPlayed;
+
+                                // Calculate Difficulty Tag
+                                let diffTag: string = level.difficulty;
+                                if (!diffTag && level.population) {
+                                    diffTag = getDifficultyFromPopulation(level.population);
+                                }
+                                const isHardOrExpert = diffTag === 'Difficile' || diffTag === 'Hard' || diffTag === 'Expert' || diffTag === 'Very Hard';
+
+                                return (
+                                    <button
+                                        key={level.id}
+                                        onClick={() => canPlay && onSelectLevel(level.id)}
+                                        disabled={!canPlay}
+                                        className={`
                                     relative flex flex-col items-center justify-center p-2 md:p-4 rounded-xl md:rounded-2xl border transition-all duration-300 group
                                     ${isCompleted
-                                        ? 'border-green-500/30 bg-green-500/10 hover:bg-green-500/20 cursor-default grayscale-0 opacity-100'
-                                    : isFailed
-                                        ? 'border-red-500/30 bg-red-500/10 hover:bg-red-500/20 cursor-default grayscale-0 opacity-100'
-                                        : isUnlocked
-                                            ? 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/50 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10'
-                                            : 'border-transparent bg-black/20 opacity-40 cursor-not-allowed grayscale'}
+                                                ? 'border-green-500/30 bg-green-500/10 hover:bg-green-500/20 cursor-default grayscale-0 opacity-100'
+                                                : isFailed
+                                                    ? 'border-red-500/30 bg-red-500/10 hover:bg-red-500/20 cursor-default grayscale-0 opacity-100'
+                                                    : isUnlocked
+                                                        ? 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/50 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10'
+                                                        : 'border-transparent bg-black/20 opacity-40 cursor-not-allowed grayscale'}
                                 `}
-                            >
-                                <span className={`text-lg md:text-xl font-black mb-0.5 md:mb-1 ${isCompleted ? 'text-green-400' : isFailed ? 'text-red-400' : isUnlocked ? 'text-white group-hover:text-blue-400' : 'text-slate-500'}`}>
-                                    {level.id}
-                                </span>
-
-                                {(isUnlocked || hasPlayed) ? (
-                                    <div className="flex flex-col items-center w-full">
-                                        <div className="w-full h-px bg-white/5 my-1 md:my-2" />
-                                        <span className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate max-w-full">
-                                            {hasPlayed ? level.cityName : '???'}
+                                    >
+                                        <span className={`text-lg md:text-xl font-black mb-0.5 md:mb-1 ${isCompleted ? 'text-green-400' : isFailed ? 'text-red-400' : isUnlocked ? 'text-white group-hover:text-blue-400' : 'text-slate-500'}`}>
+                                            {level.id}
                                         </span>
-                                        {isCompleted ? (
-                                            <div className="mt-1 md:mt-2 flex items-center gap-1 text-[10px] md:text-xs font-bold text-green-400 bg-green-400/10 px-1.5 md:px-2 py-0.5 rounded-full">
-                                                <Check className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                                                {bestScore}
-                                            </div>
-                                        ) : isFailed ? (
-                                            <div className="mt-1 md:mt-2 flex items-center gap-1 text-[10px] md:text-xs font-bold text-red-500 bg-red-500/10 px-1.5 md:px-2 py-0.5 rounded-full">
-                                                <X className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                                                Échec
+
+                                        {(isUnlocked || hasPlayed) ? (
+                                            <div className="flex flex-col items-center w-full">
+                                                <div className="w-full h-px bg-white/5 my-1 md:my-2" />
+                                                <span className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate max-w-full">
+                                                    {hasPlayed ? level.cityName : '???'}
+                                                </span>
+                                                {isCompleted ? (
+                                                    <div className="mt-1 md:mt-2 flex items-center gap-1 text-[10px] md:text-xs font-bold text-green-400 bg-green-400/10 px-1.5 md:px-2 py-0.5 rounded-full">
+                                                        <Check className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                                        {bestScore}
+                                                    </div>
+                                                ) : isFailed ? (
+                                                    <div className="mt-1 md:mt-2 flex items-center gap-1 text-[10px] md:text-xs font-bold text-red-500 bg-red-500/10 px-1.5 md:px-2 py-0.5 rounded-full">
+                                                        <X className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                                                        Échec
+                                                    </div>
+                                                ) : (
+                                                    <div className="mt-1 md:mt-2 flex flex-col items-center gap-1">
+                                                        {diffTag && (
+                                                            <span className={`text-[8px] font-bold uppercase px-1 rounded bg-black/30 ${isHardOrExpert ? 'text-orange-400' : 'text-slate-400'}`}>
+                                                                {diffTag}
+                                                            </span>
+                                                        )}
+                                                        <div className="text-[9px] md:text-[10px] text-slate-500 bg-white/5 px-1.5 md:px-2 py-0.5 rounded-full">
+                                                            Jouer
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ) : (
-                                            <div className="mt-1 md:mt-2 flex flex-col items-center gap-1">
-                                                {diffTag && (
-                                                    <span className={`text-[8px] font-bold uppercase px-1 rounded bg-black/30 ${isHardOrExpert ? 'text-orange-400' : 'text-slate-400'}`}>
-                                                        {diffTag}
-                                                    </span>
-                                                )}
-                                                <div className="text-[9px] md:text-[10px] text-slate-500 bg-white/5 px-1.5 md:px-2 py-0.5 rounded-full">
-                                                    Jouer
-                                                </div>
+                                            <div className="mt-1 md:mt-2">
+                                                <Lock className="h-4 w-4 md:h-5 md:w-5 text-slate-600" />
                                             </div>
                                         )}
-                                    </div>
-                                ) : (
-                                    <div className="mt-1 md:mt-2">
-                                        <Lock className="h-4 w-4 md:h-5 md:w-5 text-slate-600" />
-                                    </div>
-                                )}
 
-                                {isHardOrExpert ? (
-                                    <div className="absolute top-1 right-1 md:top-2 md:right-2">
-                                        <Star className="h-2 w-2 md:h-2.5 md:w-2.5 text-amber-400 fill-amber-400" />
-                                    </div>
-                                ) : null}
-                            </button>
-                        );
-                    })}
-                </div>
+                                        {isHardOrExpert ? (
+                                            <div className="absolute top-1 right-1 md:top-2 md:right-2">
+                                                <Star className="h-2 w-2 md:h-2.5 md:w-2.5 text-amber-400 fill-amber-400" />
+                                            </div>
+                                        ) : null}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                 )}
             </div>
         </div>
