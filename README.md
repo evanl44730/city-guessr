@@ -22,6 +22,7 @@ CityGuessr est une application web interactive de jeux géographiques. Le concep
 ### 🌐 Multijoueur en ligne
 - Salons privés (code 4 lettres). Jusqu'à plusieurs joueurs simultanés.
 - Même ville pour tous, score basé sur les essais.
+- Personnalisation : choix du mode, des catégories et du nombre de manches.
 
 ### 📅 Défi du Jour
 - Une ville unique par jour, identique pour tous les joueurs.
@@ -38,6 +39,24 @@ CityGuessr est une application web interactive de jeux géographiques. Le concep
 - **Aucune carte.** Tapez des noms de villes et recevez des indices distance/direction.
 - **Radar SVG animé** avec balayage rotatif et blips de triangulation.
 - 4 niveaux de difficulté (Facile → Expert) contrôlant le pool de villes et le nombre d'essais.
+- Progression par série : le joueur avance au niveau suivant s'il devine correctement.
+
+### 🔮 L'Ombre Mystère
+- Identifiez des **départements français** ou **pays européens** à partir de leur **silhouette**.
+- 4 propositions. Score sans fin tant que le joueur ne se trompe pas.
+
+### 📏 Le Juste Kilomètre
+- Deux villes affichées. Estimez la **distance** entre elles avec un slider.
+- 10 manches. Score sur 10 000 basé sur la précision.
+- Carte de résultat montrant les deux villes reliées.
+
+### 🗺️ Chrono Départements
+- Trouvez **tous les départements français** sur une carte interactive le plus vite possible.
+- Pénalité de +5 s par erreur. DOM-TOM affichés en encarts.
+
+### 👤 Mon Profil
+- Consultez vos **records et statistiques** pour tous les modes de jeu.
+- Séries Radar par difficulté. Réinitialisation possible.
 
 ## 🛠️ Stack Technique
 
@@ -74,18 +93,29 @@ Accéder à l'application : [http://localhost:3000](http://localhost:3000)
 
 ```
 ├── app/                 # Pages et routing Next.js (App Router)
-├── components/          # Composants React (17 fichiers)
-│   ├── MainMenu.tsx     # Menu principal (9 modes)
+├── components/          # Composants React (23 fichiers)
+│   ├── MainMenu.tsx     # Menu principal (12 modes + profil)
 │   ├── GameOverlay.tsx  # Interface de jeu solo
 │   ├── MapComponent.tsx # Carte Leaflet
 │   ├── HigherLowerGame.tsx  # Plus ou Moins / Nord ou Sud
 │   ├── MiniMapNorthSouth.tsx # Mini-carte avec dégradé N/S
 │   ├── RadarGame.tsx    # Mode Radar (SVG animé)
-│   └── ...              # Menus, lobbys, leaderboard
-├── data/                # Données statiques (cities.json, storyLevels.ts)
+│   ├── ShapeGame.tsx    # L'Ombre Mystère (silhouettes)
+│   ├── DistanceGame.tsx # Le Juste Kilomètre (slider)
+│   ├── DepartmentTimeAttack.tsx # Chrono Départements
+│   ├── ProfilePage.tsx  # Page Profil & Records
+│   ├── OnlineMenu.tsx   # Menu multijoueur (créer/rejoindre)
+│   └── ...              # Menus, lobbys, leaderboard, sélecteurs de carte
+├── data/                # Données statiques
+│   ├── cities.json      # Base de données des villes
+│   ├── storyLevels.ts   # Niveaux du mode Histoire
+│   ├── departments.ts   # 101 départements français
+│   └── europe.ts        # Pays européens
 ├── hooks/               # Hooks React (gestion d'état du jeu)
-├── lib/                 # Configuration Supabase
+├── lib/                 # Configuration Supabase + Socket client
+├── public/data/         # GeoJSONs (france-departments-dom, europe)
 ├── utils/               # Fonctions utilitaires (distance, direction, hints)
+├── scripts/             # Scripts d'import de données
 ├── server.js            # Serveur Node.js (Next.js + Socket.io)
 ├── SPECS.md             # Spécifications techniques détaillées
 └── README.md            # Ce fichier

@@ -34,10 +34,10 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
     // Daily Mode Share Logic
     const handleShareDaily = () => {
         if (!targetCity) return;
-        
+
         let emojiGrid = '';
         const maxAttempts = 6;
-        
+
         // Generate grid
         for (let i = 0; i < maxAttempts; i++) {
             if (i < guesses.length) {
@@ -47,9 +47,9 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                 else if (dist < 200) emojiGrid += '🟧'; // Close
                 else emojiGrid += '🟥'; // Far
             } else if (i === guesses.length && gameState === 'won') {
-                 // The winning guess isn't fully in `guesses` array until next render sometimes, 
-                 // but typically in this setup `attempts` holds the winning attempt count.
-                 // Actually `guesses` DOES contain the winning guess.
+                // The winning guess isn't fully in `guesses` array until next render sometimes, 
+                // but typically in this setup `attempts` holds the winning attempt count.
+                // Actually `guesses` DOES contain the winning guess.
             } else {
                 emojiGrid += '⬛'; // Unused
             }
@@ -58,7 +58,7 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
         const winCount = gameState === 'won' ? attempts : 'X';
         const todayStr = new Date().toLocaleDateString('fr-FR');
         const shareText = `CityGuessr - Défi Quotidien (${todayStr})\n${winCount}/6\n\n${emojiGrid}\n\nhttps://cityguessr.fr`;
-        
+
         navigator.clipboard.writeText(shareText);
         setHasSubmitted(true); // Reuse this state to show "Copied" feedback
         setTimeout(() => setHasSubmitted(false), 2000);
@@ -294,8 +294,8 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                                 <button
                                     onClick={handleShareDaily}
                                     className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold text-lg transition-all shadow-lg
-                                        ${hasSubmitted 
-                                            ? 'bg-green-500 text-white' 
+                                        ${hasSubmitted
+                                            ? 'bg-green-500 text-white'
                                             : 'bg-yellow-500 hover:bg-yellow-400 text-yellow-950 shadow-yellow-500/20'}`}
                                 >
                                     {hasSubmitted ? '✓ Résultat copié !' : <><Share2 className="h-5 w-5" /> Partager mon score</>}
@@ -306,8 +306,8 @@ export default function GameOverlay({ attempts, guesses, gameState, targetCity, 
                                     <button
                                         onClick={onNextLevel || onMenu}
                                         className={`w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl font-bold text-lg transition-all shadow-lg text-white
-                                            ${gameState === 'won' 
-                                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:brightness-110 hover:scale-[1.02] shadow-green-500/20' 
+                                            ${gameState === 'won'
+                                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:brightness-110 hover:scale-[1.02] shadow-green-500/20'
                                                 : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:brightness-110 hover:scale-[1.02] shadow-blue-500/20'}`}
                                     >
                                         <Trophy className="h-5 w-5" />
