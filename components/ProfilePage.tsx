@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Home, Trophy, Clock, Ruler, Compass, TrendingUp, LayoutGrid, MapPin, Star, Trash2, Radar } from 'lucide-react';
+import { Home, Trophy, Clock, Ruler, Compass, TrendingUp, LayoutGrid, MapPin, Star, Trash2, Radar, Book, Sparkles } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { getFoundCities, FOUND_CITIES_KEY } from '@/utils/progressTracker';
+import { getUnlockedAchievements, ACHIEVEMENTS } from '@/utils/achievements';
+import { CityData } from '@/utils/gameUtils';
+
+const DynamicHeatmap = dynamic(() => import('./Heatmap'), {
+    ssr: false,
+    loading: () => <div className="w-full h-full flex items-center justify-center bg-slate-800/50 animate-pulse text-slate-400">Chargement de la carte...</div>
+});
 
 interface ProfilePageProps {
     onBack: () => void;
@@ -90,6 +99,9 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
     const [records, setRecords] = useState<Record<string, number | null>>({});
     const [storyProgress, setStoryProgress] = useState<Record<string, number>>({});
     const [radarStreaks, setRadarStreaks] = useState<Record<string, number>>({});
+    const [foundCities, setFoundCities] = useState<CityData[]>([]);
+    const [unlockedAchievements, setUnlockedAchievements] = useState<string[]>([]);
+    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
         const newRecords: Record<string, number | null> = {};
@@ -118,6 +130,10 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                 setRadarStreaks({});
             }
         }
+        
+        setFoundCities(getFoundCities());
+        setUnlockedAchievements(getUnlockedAchievements());
+        setIsMounted(true);
     }, []);
 
     const completedLevels = Object.keys(storyProgress).length;
@@ -129,9 +145,12 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
             localStorage.removeItem('city_guessr_story_progress');
             localStorage.removeItem('city_guessr_daily_progress');
             localStorage.removeItem('radarBestStreaks');
+            localStorage.removeItem(FOUND_CITIES_KEY);
             setRecords({});
             setStoryProgress({});
             setRadarStreaks({});
+            setFoundCities([]);
+            setUnlockedAchievements([]);
         }
     };
 
@@ -261,6 +280,67 @@ export default function ProfilePage({ onBack }: ProfilePageProps) {
                                     </div>
                                 );
                             })}
+                        </div>
+                    </div>
+
+                    {/* Achievements Section */}
+                    <div>
+                        <h3 className="text-xl md:text-2xl font-black text-white mb-6 flex items-center gap-2 border-b border-white/10 pb-4">
+                            <Star className="w-6 h-6 text-amber-400" />
+                            Mes Succès
+                        </h3>
+                        
+                        <div className="flex flex-col gap-8 md:gap-10">
+                            {[
+                                { id: 'exploration', label: 'Exploration', icon: <MapPin className="w-5 h-5 text-blue-400" /> },
+                                { id: 'story', label: 'Mode Histoire', icon: <Book className="w-5 h-5 text-amber-500" /> },
+                                { id: 'challenges', label: 'Défis & Records', icon: <Trophy className="w-5 h-5 text-emerald-400" /> },
+                                { id: 'easter_eggs', label: 'Insolites', icon: <Sparkles className="w-5 h-5 text-fuchsia-400" /> }
+                            ].map(category => {
+                                const categoryAchievements = ACHIEVEMENTS.filter(a => (a as any).category === category.id);
+                                if (categoryAchievements.length === 0) return null;
+
+                                return (
+                                    <div key={category.id}>
+                                        <h4 className="text-md md:text-lg font-bold text-slate-300 mb-3 flex items-center gap-2">
+                                            {category.icon}
+                                            {category.label}
+                                        </h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+                                            {categoryAchievements.map(ach => {
+                                                const isUnlocked = unlockedAchievements.includes(ach.id);
+                                                return (
+                                                    <div key={ach.id} className={`flex items-center gap-4 p-4 rounded-2xl border bg-slate-800/60 backdrop-blur-sm transition-all ${isUnlocked ? 'border-white/20 hover:scale-[1.02]' : 'border-white/5 opacity-40 grayscale'}`}>
+                                                        <div className={`text-3xl flex-shrink-0 ${isUnlocked ? ach.color : 'text-slate-500'}`}>
+                                                            {isUnlocked ? ach.icon : '🔒'}
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-white text-sm">{ach.title}</h4>
+                                                            <p className="text-xs text-slate-400 mt-1 leading-tight">{ach.description}</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Heatmap Section */}
+                    <div>
+                        <h3 className="text-lg md:text-xl font-black text-white mb-4 flex items-center gap-2">
+                            <MapPin className="w-5 h-5 text-red-500" />
+                            Carte de Chaleur Personnelle
+                            <span className="text-xs font-medium text-slate-400 ml-2 bg-slate-800 px-2 py-1 rounded-full">
+                                {foundCities.length} {foundCities.length > 1 ? 'villes trouvées' : 'ville trouvée'}
+                            </span>
+                        </h3>
+                        <div className="w-full h-64 md:h-96 rounded-2xl overflow-hidden border border-white/10 relative z-0 shadow-lg cursor-crosshair">
+                            {isMounted && (
+                                <DynamicHeatmap foundCities={foundCities} />
+                            )}
                         </div>
                     </div>
 

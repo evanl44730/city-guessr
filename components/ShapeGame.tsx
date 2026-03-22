@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { DEPARTMENTS } from '@/data/departments';
 import { EUROPEAN_COUNTRIES } from '@/data/europe';
+import { checkAndNotifyAchievements } from '@/utils/achievements';
 
 interface ShapeGameProps {
     onBack: () => void;
@@ -153,6 +154,7 @@ export default function ShapeGame({ onBack }: ShapeGameProps) {
             if (newScore > bestScore) {
                 setBestScore(newScore);
                 localStorage.setItem('shapeGameBestScore', newScore.toString());
+                checkAndNotifyAchievements();
             }
 
             // Wait 1.5s then next round

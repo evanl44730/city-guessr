@@ -17,6 +17,7 @@ import DailyMenu from '@/components/DailyMenu';
 import HigherLowerGame from '@/components/HigherLowerGame';
 import RadarGame from '@/components/RadarGame';
 import ProfilePage from '@/components/ProfilePage';
+import AchievementToast from '@/components/AchievementToast';
 
 // Dynamically import map components to avoid SSR issues with Leaflet
 const ShapeGame = dynamic(() => import('@/components/ShapeGame'), {
@@ -235,7 +236,7 @@ export default function Home() {
   };
 
   const handleRestart = () => {
-    setInMenu(true);
+    restartGame(gameMode as any, currentLevelId, selectedDepartment, selectedCountry, selectedDate);
   };
 
   const center: [number, number] = targetCity
@@ -426,6 +427,8 @@ export default function Home() {
       <footer className="mt-4 md:mt-8 pb-2 text-center text-slate-500 text-[10px] md:text-xs font-medium tracking-widest uppercase z-10 opacity-70 hover:opacity-100 transition-opacity">
         Devinez la ville • Zoom progressif • v1.0
       </footer>
+      
+      <AchievementToast />
     </main>
   );
 }

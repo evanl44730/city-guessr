@@ -140,9 +140,11 @@ L'application propose **12 modes de jeu** basés sur la géographie, ainsi qu'un
 
 ### 2.13 Page Profil (« Mon Profil »)
 - **Récapitulatif** des statistiques du joueur : étoiles du mode Histoire, niveaux complétés, nombre de records établis.
+- **Carte de Chaleur Personnelle (Heatmap)** : Carte Leaflet (`Heatmap.tsx` importé dynamiquement sans SSR) affichant des marqueurs (`CircleMarker`) pour toutes les villes trouvées dans les différents modes de jeu.
+- **Grille des Succès (Achievements)** : Liste de 26 badges dynamiques répartis en 4 catégories visuelles (Exploration, Histoire, Défis & Records, Insolites). Courbe très progressive (ex. 1 ➔ 1000 villes). **[NOUVEAU]** : Notifications "Toast" animées affichées en temps réel lorsqu'un succès est débloqué pendant une partie.
 - **Grille des meilleurs scores** pour chaque mode de jeu : Contre-la-montre, Plus ou Moins, Nord ou Sud, L'Ombre Mystère, Le Juste km, Chrono Départements.
 - **Section Radar** : Meilleures séries par difficulté (Facile, Moyen, Difficile, Expert).
-- **Réinitialisation** : Bouton pour effacer tous les records et la progression.
+- **Réinitialisation** : Bouton pour effacer tous les records, la progression du mode Histoire, la Heatmap et les Succès via `localStorage.removeItem`.
 - Composant : `ProfilePage.tsx`.
 
 ---
@@ -320,3 +322,4 @@ Liste statique dans `data/europe.ts` :
 | `distanceGameBest` | Le Juste km | Meilleur score (sur 10 000) |
 | `deptTimeAttackBest` | Chrono Départements | Meilleur temps (dixièmes de s) |
 | `radarBestStreaks` | Radar | Meilleures séries par difficulté (JSON) |
+| `city_guessr_found_cities` | Global / Heatmap | Liste des villes trouvées (ID/Coordonnées/Infos stockées en JSON) |

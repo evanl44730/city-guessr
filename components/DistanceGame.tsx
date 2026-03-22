@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { CityData, calculateDistance } from '@/utils/gameUtils';
+import { checkAndNotifyAchievements } from '@/utils/achievements';
 
 interface DistanceGameProps {
     citiesData: CityData[];
@@ -118,6 +119,7 @@ export default function DistanceGame({ citiesData, onBack }: DistanceGameProps) 
             if (bestScore === null || finalScore > bestScore) {
                 setBestScore(finalScore);
                 localStorage.setItem('distanceGameBest', finalScore.toString());
+                checkAndNotifyAchievements();
             }
             setGameState('ended');
         } else {

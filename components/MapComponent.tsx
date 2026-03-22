@@ -136,7 +136,8 @@ export default function MapComponent({ center, zoom, guesses, targetCity, gameSt
            }
         }
       } catch (error) {
-        console.error("Failed to load boundary:", error);
+        // Silenced or downgraded to warn to prevent Next.js from showing a dev overlay for a network error
+        console.warn("Failed to load boundary (network or not found):", error);
       }
     }
 

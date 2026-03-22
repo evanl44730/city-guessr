@@ -3,6 +3,8 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Home, RotateCcw, Trophy, Radar, Search, Crosshair, Zap, Target, Shield, Skull } from 'lucide-react';
 import { CityData, calculateDistance, calculateDirection } from '@/utils/gameUtils';
+import { trackFoundCity } from '@/utils/progressTracker';
+import { checkAndNotifyAchievements } from '@/utils/achievements';
 
 type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
 type GamePhase = 'menu' | 'playing' | 'won' | 'lost';
@@ -83,6 +85,7 @@ export default function RadarGame({ citiesData, onBack }: RadarGameProps) {
             if (currentStreak > prevBest) {
                 const updated = { ...prev, [diff]: currentStreak };
                 localStorage.setItem('radarBestStreaks', JSON.stringify(updated));
+                checkAndNotifyAchievements();
                 return updated;
             }
             return prev;
@@ -163,6 +166,7 @@ export default function RadarGame({ citiesData, onBack }: RadarGameProps) {
         const isWin = distance < 1 || city.name.toLowerCase() === targetCity.name.toLowerCase();
 
         if (isWin) {
+            trackFoundCity(targetCity);
             const newStreak = streak + 1;
             setStreak(newStreak);
             saveBestStreak(difficulty!, newStreak);

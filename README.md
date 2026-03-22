@@ -56,7 +56,10 @@ CityGuessr est une application web interactive de jeux géographiques. Le concep
 
 ### 👤 Mon Profil
 - Consultez vos **records et statistiques** pour tous les modes de jeu.
-- Séries Radar par difficulté. Réinitialisation possible.
+- Séries Radar par difficulté.
+- **Carte de Chaleur Personnelle** : Visualisez toutes les villes que vous avez découvertes sur une carte interactive Leaflet.
+- **Système de Succès** : Débloquez 26 badges uniques répartis en 4 catégories (Exploration, Histoire, Records, Insolites) avec une courbe de difficulté très progressive (ex: de 1 à 1000 villes trouvées). Notifications animées (Toast) lors de l'obtention d'un succès en jeu.
+- Réinitialisation complète possible (efface les records, la progression du mode Histoire, la heatmap et les succès).
 
 ## 🛠️ Stack Technique
 

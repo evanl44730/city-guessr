@@ -5,6 +5,8 @@ import { CityData, calculateDistance, calculateDirection, getRandomCity, getDail
 import { STORY_LEVELS, StoryLevel, generateStoryLevelsForDepartment } from '@/data/storyLevels';
 import { socket } from '@/lib/socket';
 import { supabase } from '@/lib/supabaseClient';
+import { trackFoundCity } from '@/utils/progressTracker';
+import { checkAndNotifyAchievements } from '@/utils/achievements';
 
 export type GameState = 'playing' | 'won' | 'lost' | 'waiting' | 'ended';
 
@@ -156,6 +158,7 @@ export function useGame() {
                         if (currentScore > savedBest) {
                             localStorage.setItem('timeAttackBestScore', currentScore.toString());
                             setTimeAttackBest(currentScore);
+                            checkAndNotifyAchievements();
                         }
                         return currentScore;
                     });
@@ -419,6 +422,8 @@ export function useGame() {
             const isLoss = newAttempts >= 6;
 
             if (isWin) {
+                trackFoundCity(targetCity);
+                checkAndNotifyAchievements();
                 if (gameMode === 'time_attack') {
                     // Score calculation based on attempts
                     // 1 attempt = 1000, 2 = 850, 3 = 700...
